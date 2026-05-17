@@ -118,7 +118,7 @@ auto LSystems::GetStageCountFromUser() noexcept -> uint32_t
     return stageCount;
 }
 
-auto LSystems::GenerateStages(std::string_view const axiom, Rules const& rules, uint32_t const stageCount) noexcept -> std::vector<std::string>
+auto LSystems::GenerateStages(std::string_view const axiom, Rules const& rules, uint32_t const stageCount) noexcept -> Stages
 {
     std::vector<std::string> stages;
     stages.reserve(stageCount);
@@ -150,4 +150,12 @@ auto LSystems::GenerateStages(std::string_view const axiom, Rules const& rules, 
     }
 
     return stages;
+}
+
+auto LSystems::PrintStages(Stages const& stages) noexcept -> void
+{
+    for (auto&& [stageIdx, stage] : std::views::enumerate(stages))
+    {
+        std::println("Stage {}: {}", stageIdx + 1, stage);
+    }
 }

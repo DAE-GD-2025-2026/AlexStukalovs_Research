@@ -14,6 +14,7 @@ namespace LSystems
 {
     using Rule = std::pair<char, std::string>;
     using Rules = std::unordered_map<char, std::string>;
+    using Stages = std::vector<std::string>;
     using ErrorMessage = std::string;
 
     auto GetAxiomFromUser() noexcept -> std::string;
@@ -26,7 +27,9 @@ namespace LSystems
 
     auto GetStageCountFromUser() noexcept -> uint32_t;
 
-    auto GenerateStages(std::string_view axiom, Rules const& rules, uint32_t stageCount) noexcept -> std::vector<std::string>;
+    auto GenerateStages(std::string_view axiom, Rules const&, uint32_t stageCount) noexcept -> Stages;
+
+    auto PrintStages(Stages const&) noexcept -> void;
 
 }
 

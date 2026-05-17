@@ -7,7 +7,8 @@ int main()
     auto const axiom{ LSystems::GetAxiomFromUser() };
     auto const rules{ LSystems::GetRulesFromUser() };
     auto const stageCount{ LSystems::GetStageCountFromUser() };
-    LSystems::GenerateStages(axiom, rules, stageCount);
+    auto const stages{ LSystems::GenerateStages(axiom, rules, stageCount) };
+    LSystems::PrintStages(stages);
 
     return 0;
 }
