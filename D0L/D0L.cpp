@@ -3,11 +3,10 @@
 // Standard
 #include <iostream>
 #include <cctype>// std::isalpha
+#include <numeric>
 
 auto LSystems::GetAxiomFromUser() noexcept -> std::string
 {
-    // NOTE: I won't complicate the code with validation,
-    // it's purpose if demonstrating the L-systems, not being fool-proof.
     std::string axiom;
     auto const isAxiomInvalid{
         [&]
@@ -119,7 +118,36 @@ auto LSystems::GetStageCountFromUser() noexcept -> uint32_t
     return stageCount;
 }
 
-void LSystems::PrintStages(std::string_view axiom, Rules rules, uint32_t stageCount) noexcept
+auto LSystems::GenerateStages(std::string_view const axiom, Rules const& rules, uint32_t const stageCount) noexcept -> std::vector<std::string>
 {
+    std::vector<std::string> stages;
+    stages.reserve(stageCount);
 
+    std::string_view currentStage{ axiom };
+    std::string newStage;
+
+    for ([[maybe_unused]] auto _ : std::views::iota(0u, stageCount))
+    {
+        for (char character : currentStage)
+        {
+            // No rule -> adding the character
+            if (!rules.contains(character))
+            {
+                newStage.push_back(character);
+                continue;
+            }
+
+            // Has rule -> adding the rule
+            newStage.append_range(rules.at(character));
+        }
+
+        // Saving the stage
+        stages.push_back(std::move(newStage));
+        // Setting the new stage as current one
+        currentStage = stages.back();
+        // Preparing to reuse the string for the new stage
+        newStage.clear();
+    }
+
+    return stages;
 }

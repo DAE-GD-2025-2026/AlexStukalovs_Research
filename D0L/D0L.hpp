@@ -2,6 +2,7 @@
 #define D0L
 
 // Standard
+#include <vector>
 #include <expected>
 #include <print>
 #include <ranges>
@@ -25,7 +26,7 @@ namespace LSystems
 
     auto GetStageCountFromUser() noexcept -> uint32_t;
 
-    void PrintStages(std::string_view axiom, Rules rules, uint32_t stageCount) noexcept;
+    auto GenerateStages(std::string_view axiom, Rules const& rules, uint32_t stageCount) noexcept -> std::vector<std::string>;
 
 }
 
