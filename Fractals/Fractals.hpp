@@ -1,9 +1,11 @@
-﻿#ifndef FRACTALS
-#define FRACTALS
+﻿#ifndef FRACTALS_HPP
+#define FRACTALS_HPP
+// Project
+#include "D0L.hpp"
 
 namespace LSystems {
-    void VisualizeLSystem();
+    void RunD0LVisualizer(std::string_view stage) noexcept;
 
 }
 
-#endif// FRACTALS
+#endif// FRACTALS_HPP

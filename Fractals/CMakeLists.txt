@@ -11,6 +11,28 @@ file(GLOB_RECURSE
     "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
 )
 
+message(${SOURCES})
+
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE D0L_LIB)
+# Dependencies
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.4.0
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE# Displaying cloning process in terminal
+)
+FetchContent_MakeAvailable(SDL3)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE D0L_LIB SDL3::SDL3)
+
+# Copying SDL to the project's dir
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:SDL3::SDL3>"
+    ${CMAKE_CURRENT_BINARY_DIR}
+    VERBATIM
+)

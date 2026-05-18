@@ -7,7 +7,7 @@ int main()
 {
     std::println("D0L generator");
     auto const lsystem{
-        LSystems::GetLSystemFromUser()
+        LSystems::GetD0LFromUser()
     };
     auto const stages{ LSystems::GenerateStages(lsystem) };
     LSystems::PrintStages(stages);

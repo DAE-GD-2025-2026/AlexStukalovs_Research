@@ -1,5 +1,5 @@
-#ifndef D0L
-#define D0L
+#ifndef D0L_HPP
+#define D0L_HPP
 
 // Standard
 #include <vector>
@@ -15,18 +15,18 @@ namespace LSystems
     using Stages = std::vector<std::string>;
     using ErrorMessage = std::string;
 
-    struct LSystem {
+    struct D0L final {
         std::string axiom;
         Rules rules;
         uint32_t stageCount;
     };
 
-    auto GetLSystemFromUser() noexcept -> LSystem;
+    auto GetD0LFromUser() noexcept -> D0L;
 
-    auto GenerateStages(LSystem const&) noexcept -> Stages;
+    auto GenerateStages(D0L const&) noexcept -> Stages;
 
     auto PrintStages(Stages const&) noexcept -> void;
 
 }
 
-#endif// D0L
+#endif// D0L_HPP
