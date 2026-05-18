@@ -4,8 +4,6 @@
 // Standard
 #include <vector>
 #include <expected>
-#include <print>
-#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <cstdint>
@@ -17,17 +15,15 @@ namespace LSystems
     using Stages = std::vector<std::string>;
     using ErrorMessage = std::string;
 
-    auto GetAxiomFromUser() noexcept -> std::string;
+    struct LSystem {
+        std::string axiom;
+        Rules rules;
+        uint32_t stageCount;
+    };
 
-    auto RemoveSpaces(std::string_view) noexcept -> std::string;
+    auto GetLSystemFromUser() noexcept -> LSystem;
 
-    auto ParseRuleLine(std::string_view) noexcept -> std::expected<Rule, ErrorMessage>;
-
-    auto GetRulesFromUser() noexcept -> Rules;
-
-    auto GetStageCountFromUser() noexcept -> uint32_t;
-
-    auto GenerateStages(std::string_view axiom, Rules const&, uint32_t stageCount) noexcept -> Stages;
+    auto GenerateStages(LSystem const&) noexcept -> Stages;
 
     auto PrintStages(Stages const&) noexcept -> void;
 

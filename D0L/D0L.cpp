@@ -3,7 +3,24 @@
 // Standard
 #include <iostream>
 #include <cctype>// std::isalpha
-#include <numeric>
+#include <ranges>
+#include <print>
+
+namespace LSystems {
+    auto GetAxiomFromUser() noexcept -> std::string;
+
+    auto RemoveSpaces(std::string_view) noexcept -> std::string;
+
+    auto ParseRuleLine(std::string_view) noexcept -> std::expected<Rule, ErrorMessage>;
+
+    auto GetRulesFromUser() noexcept -> Rules;
+
+    auto GetStageCountFromUser() noexcept -> uint32_t;
+}
+
+auto LSystems::GetLSystemFromUser() noexcept -> LSystem {
+    return LSystem{ GetAxiomFromUser(), GetRulesFromUser(), GetStageCountFromUser() };
+}
 
 auto LSystems::GetAxiomFromUser() noexcept -> std::string
 {
@@ -118,27 +135,27 @@ auto LSystems::GetStageCountFromUser() noexcept -> uint32_t
     return stageCount;
 }
 
-auto LSystems::GenerateStages(std::string_view const axiom, Rules const& rules, uint32_t const stageCount) noexcept -> Stages
+auto LSystems::GenerateStages(LSystem const& lsystem) noexcept -> Stages
 {
     std::vector<std::string> stages;
-    stages.reserve(stageCount);
+    stages.reserve(lsystem.stageCount);
 
-    std::string_view currentStage{ axiom };
+    std::string_view currentStage{ lsystem.axiom };
     std::string newStage;
 
-    for ([[maybe_unused]] auto _ : std::views::iota(0u, stageCount))
+    for ([[maybe_unused]] auto _ : std::views::iota(0u, lsystem.stageCount))
     {
         for (char character : currentStage)
         {
             // No rule -> adding the character
-            if (!rules.contains(character))
+            if (!lsystem.rules.contains(character))
             {
                 newStage.push_back(character);
                 continue;
             }
 
             // Has rule -> adding the rule
-            newStage.append_range(rules.at(character));
+            newStage.append_range(lsystem.rules.at(character));
         }
 
         // Saving the stage

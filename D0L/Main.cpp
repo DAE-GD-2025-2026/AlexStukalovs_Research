@@ -1,13 +1,15 @@
 // Project
 #include "D0L.hpp"
+// Standard
+#include <print>
 
 int main()
 {
     std::println("D0L generator");
-    auto const axiom{ LSystems::GetAxiomFromUser() };
-    auto const rules{ LSystems::GetRulesFromUser() };
-    auto const stageCount{ LSystems::GetStageCountFromUser() };
-    auto const stages{ LSystems::GenerateStages(axiom, rules, stageCount) };
+    auto const lsystem{
+        LSystems::GetLSystemFromUser()
+    };
+    auto const stages{ LSystems::GenerateStages(lsystem) };
     LSystems::PrintStages(stages);
 
     return 0;

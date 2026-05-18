@@ -12,3 +12,5 @@ file(GLOB_RECURSE
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE D0L_LIB)
