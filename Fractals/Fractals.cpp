@@ -1,11 +1,30 @@
 ﻿// Project
-#include "Engine/Application.hpp"
 #include "Fractals.hpp"
 #include "D0L.hpp"
+// Engine
+#include "Engine/Application.hpp"
+// Standard
+#include <print>
 
-void LSystems::RunD0LVisualizer(std::string_view const stage) noexcept {
+void LSystems::RunD0LVisualizer() {
+    std::println("Fractal visualizer");
 
-    LSystems::Engine::Vector2u constexpr windowDims{ 720, 480 };
-    LSystems::Engine::Application engine{ "Fractal visualizer", windowDims };
-    engine.Run(stage);
+    // LSystems::D0L const d0l{
+    //     LSystems::GetD0LFromUser()
+    // };
+
+    // LSystems::Stages const stages{
+    //     LSystems::GenerateStages(d0l)
+    // };
+
+    std::string const axiom{ };
+    Vector2f constexpr windowDims{ 1280, 720 };
+
+    Engine::Application engine{ "D0L visualizer", windowDims };
+    float constexpr lineLengthPx{ 400.f };
+    engine.Run(Engine::VisualizationData{
+        .stage = "F+F+F+F",
+        .startingPointPx = 0.5f * windowDims - 0.5f * Vector2f{lineLengthPx, lineLengthPx},
+        .lineLengthPx = lineLengthPx
+    });
 }
