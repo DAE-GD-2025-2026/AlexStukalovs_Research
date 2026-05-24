@@ -11,6 +11,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Common dependencies
 Include(FetchContent)
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/D0L")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Fractals")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Tree2D")
+add_subdirectory("Engine")
+# Adding all projects
+set(PROJECT_DIR_NAME "Projects")
+file(GLOB SUBDIRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DIR_NAME}" "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DIR_NAME}/*")
+foreach(SUBDIR ${SUBDIRS})
+    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DIR_NAME}/${SUBDIR}")
+        add_subdirectory("${PROJECT_DIR_NAME}/${SUBDIR}")
+    endif()
+endforeach()

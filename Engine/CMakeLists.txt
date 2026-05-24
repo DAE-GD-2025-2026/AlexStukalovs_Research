@@ -1,6 +1,6 @@
-set(PROJECT_NAME "Fractals")
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
-# Adding executable
+# Adding library
 file(GLOB_RECURSE
     SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
@@ -11,12 +11,11 @@ file(GLOB_RECURSE
     "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
 )
 
-message(${SOURCES})
-
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Include")
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Include/Engine")
 
 # Dependencies
-
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -41,7 +40,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3_ttf::SDL3_ttf
 )
 
-# Copying SDL to the project's dir
+# Copying SDL dll files to the engine's directory
 add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD

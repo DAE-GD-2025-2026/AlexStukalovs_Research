@@ -1,5 +1,5 @@
 // Project
-#include "D0L.hpp"
+#include "LSystem.hpp"
 // Standard
 #include <iostream>
 #include <cctype>// std::isalpha
@@ -18,8 +18,8 @@ namespace LSystems {
     auto GetStageCountFromUser() noexcept -> uint32_t;
 }
 
-auto LSystems::GetD0LFromUser() noexcept -> D0L {
-    return D0L{ GetAxiomFromUser(), GetRulesFromUser(), GetStageCountFromUser() };
+auto LSystems::GetD0LFromUser() noexcept -> LSystem {
+    return LSystem{ GetAxiomFromUser(), GetRulesFromUser(), GetStageCountFromUser() };
 }
 
 auto LSystems::GetAxiomFromUser() noexcept -> std::string
@@ -135,7 +135,7 @@ auto LSystems::GetStageCountFromUser() noexcept -> uint32_t
     return stageCount;
 }
 
-auto LSystems::GenerateStages(D0L const& lsystem) noexcept -> Stages
+auto LSystems::GenerateStages(LSystem const& lsystem) noexcept -> Stages
 {
     std::vector<std::string> stages;
     // NOTE: +1 for the axiom at the beginning

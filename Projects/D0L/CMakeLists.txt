@@ -1,4 +1,4 @@
-set(PROJECT_NAME "D0L")
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
 # Managing dependencies
 
@@ -18,14 +18,14 @@ include(Catch)
 
 # Adding library for the tested code
 add_library(D0L_LIB STATIC
-    D0L.hpp
-    D0L.cpp
+        LSystem.hpp
+        LSystem.cpp
 )
-target_include_directories(D0L_LIB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(D0L_LIB PUBLIC .)
 
 # Adding executable
 set(SOURCES
-    Main.cpp
+        Main.cpp
 )
 
 file(GLOB_RECURSE

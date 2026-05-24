@@ -15,15 +15,15 @@ namespace LSystems
     using Stages = std::vector<std::string>;
     using ErrorMessage = std::string;
 
-    struct D0L final {
+    struct LSystem final {
         std::string axiom;
         Rules rules;
         uint32_t stageCount;
     };
 
-    auto GetD0LFromUser() noexcept -> D0L;
+    auto GetD0LFromUser() noexcept -> LSystem;
 
-    auto GenerateStages(D0L const&) noexcept -> Stages;
+    auto GenerateStages(LSystem const&) noexcept -> Stages;
 
     auto PrintStages(Stages const&) noexcept -> void;
 

@@ -1,4 +1,4 @@
-set(PROJECT_NAME "Tree2D")
+get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
 # Adding executable
 file(GLOB_RECURSE
@@ -12,3 +12,4 @@ file(GLOB_RECURSE
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME} PRIVATE Engine D0L_LIB)

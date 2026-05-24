@@ -1,5 +1,5 @@
 add_executable(D0L_TESTS
-    Tests.cpp
+        Tests.cpp
 )
 
 target_link_libraries(D0L_TESTS PRIVATE
