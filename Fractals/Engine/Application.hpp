@@ -1,19 +1,21 @@
 ﻿#ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 // Project
+#include "D0L.hpp"
 #include "Vector2f.hpp"
 // Standard
-#include <cstdint>
 #include <string_view>
 
 namespace LSystems::Engine {
     struct VisualizationData final
     {
-        std::string_view stage{};
+        Stages stages{};
         Vector2f const startingPointPx{};
-        float const lineLengthPx{};
+        float const startingLineLengthPx{};
         float const lineWidthPx{5u};
     };
+
+
 
 #pragma region Application
     // The simplest SDL wrapper serving a single-only purpose of visualizing L-systems
@@ -27,8 +29,13 @@ namespace LSystems::Engine {
     private:
         Vector2f m_windowDims;
 
-        static void DrawLSystem(VisualizationData const&) noexcept;
+        void DrawLSystem(VisualizationData const&);
+
+        void DrawLine(Vector2f p1, Vector2f p2) noexcept;
+        void DrawCircle(Vector2f center, float radius) noexcept;
     };
+
+
 #pragma endregion Application
 
 }

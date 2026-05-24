@@ -23,8 +23,8 @@ void LSystems::RunD0LVisualizer() {
     Engine::Application engine{ "D0L visualizer", windowDims };
     float constexpr lineLengthPx{ 400.f };
     engine.Run(Engine::VisualizationData{
-        .stage = "F+F+F+F",
-        .startingPointPx = 0.5f * windowDims - 0.5f * Vector2f{lineLengthPx, lineLengthPx},
-        .lineLengthPx = lineLengthPx
+        .stages = Stages{"F-F-F-F"},
+        .startingPointPx = 0.5f * windowDims + 0.5f * Vector2f{-lineLengthPx, lineLengthPx},
+        .startingLineLengthPx = lineLengthPx
     });
 }
