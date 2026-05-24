@@ -134,7 +134,8 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
             savedStates.pop();
             break;
         default:
-            throw std::logic_error{std::format("Invalid character {}", character)};
+            // throw std::logic_error{std::format("Invalid character {}", character)};// It's ok!
+            break;
         }
     }
 
@@ -197,6 +198,7 @@ auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
 
 auto LSystems::Engine::Application::FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void
 {
+    if (lines.empty()) return;
     float constexpr padding{ 20.f };// px of margin on each side
 
     auto const [x, y, w, h]{ GetAABB(lines) };
