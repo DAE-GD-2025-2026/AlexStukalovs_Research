@@ -9,9 +9,8 @@
 namespace LSystems::Engine {
     struct VisualizationData final
     {
-        Stages stages{};
-        Vector2f const startingPointPx{};
-        float const startingLineLengthPx{};
+        std::string_view stage;
+        float const lineLengthPx;
         float const lineWidthPx{5u};
     };
 
@@ -24,15 +23,22 @@ namespace LSystems::Engine {
         explicit Application(std::string_view name, Vector2f windowDims);
 
         // Draws the L-system and quits if Escape is pressed
-        void Run(VisualizationData const&) noexcept;
+        auto Run(VisualizationData const&) noexcept -> void;
 
     private:
         Vector2f m_windowDims;
 
-        void DrawLSystem(VisualizationData const&);
+        auto DrawLSystem(VisualizationData const&) const -> void;
 
-        void DrawLine(Vector2f p1, Vector2f p2) noexcept;
-        void DrawCircle(Vector2f center, float radius) noexcept;
+        auto DrawLine(Vector2f p1, Vector2f p2) const noexcept -> void;
+        auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
+        auto DrawLinesFromPoints(std::vector<Vector2f> const&) const noexcept -> void;
+
+        // Creates points to draw lines inbetween
+        auto GeneratePoints(VisualizationData const&) const -> std::vector<Vector2f>;
+
+        // Puts the points in a way that the shape they make is centered
+        auto CenterPoints(std::vector<Vector2f>& points) const noexcept -> void;
     };
 
 

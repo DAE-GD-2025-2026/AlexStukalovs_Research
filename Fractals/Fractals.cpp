@@ -17,14 +17,18 @@ void LSystems::RunD0LVisualizer() {
     //     LSystems::GenerateStages(d0l)
     // };
 
-    std::string const axiom{ };
     Vector2f constexpr windowDims{ 1280, 720 };
 
+    Stages const stages{ GenerateStages(D0L{
+        .axiom = "F-F-F-F",
+        .rules = Rules{Rule{ 'F', "F-F+F+FF-F-F+F" }},
+        .stageCount = 2
+    }) };
+
     Engine::Application engine{ "D0L visualizer", windowDims };
-    float constexpr lineLengthPx{ 400.f };
+    float constexpr lineLengthPx{ 25.f };
     engine.Run(Engine::VisualizationData{
-        .stages = Stages{"F-F-F-F"},
-        .startingPointPx = 0.5f * windowDims + 0.5f * Vector2f{-lineLengthPx, lineLengthPx},
-        .startingLineLengthPx = lineLengthPx
+        .stage = stages.back(),
+        .lineLengthPx = lineLengthPx
     });
 }

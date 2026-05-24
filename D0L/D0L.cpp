@@ -138,7 +138,9 @@ auto LSystems::GetStageCountFromUser() noexcept -> uint32_t
 auto LSystems::GenerateStages(D0L const& lsystem) noexcept -> Stages
 {
     std::vector<std::string> stages;
-    stages.reserve(lsystem.stageCount);
+    // NOTE: +1 for the axiom at the beginning
+    stages.reserve(lsystem.stageCount + 1);
+    stages.emplace_back(lsystem.axiom);
 
     std::string_view currentStage{ lsystem.axiom };
     std::string newStage;
