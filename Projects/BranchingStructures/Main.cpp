@@ -83,7 +83,11 @@ int main()
         // bStages, bVisualiztion
         // cStages, cVisualiztion
         // dStages, dVisualiztion
-        // eStages, eVisualiztion
-        fStages, fVisualiztion
+        eStages, eVisualiztion
+        // fStages, fVisualiztion
     );
+    // TODO:
+    // 1. Define L-Systems in a file
+    // 2. Add ability to switch between L-Systems at runtime
+    // 3. Add text explaining the controls
 }

@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <print>
 #include <ranges>
 #include <stack>
 
@@ -88,10 +89,11 @@ struct State final
 {
     LSystems::Vector2f point{};
     float radians{},
-        relativeLength{};// from 1 to 0, where 1 is the longest it can get
+        relativeLength{},// from 1 to 0, where 1 is the longest it can get
+        widthPx{ 1.f };
 };
 
-auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, VisualizationData const& data) const -> std::vector<Line>
+auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, VisualizationData const& data) -> std::vector<Line>
 {
     // Allocating point history
     std::vector<Line> lines;
@@ -99,7 +101,7 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
 
     // Allocating state stack
     std::stack<State> savedStates;
-    State currentState{{}, data.startRadians, 1.f};
+    State currentState{{}, data.startRadians, 1.f, data.trunkWidth};
 
     // Generating the points
     for (char const character : stage)
@@ -111,11 +113,11 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
             // Drawing a line in the current direction
             Vector2f const newPointPx {
                 currentState.point + Vector2f {
-                    std::cosf(currentState.radians) * currentState.relativeLength,
-                    std::sinf(currentState.radians) * currentState.relativeLength,
+                    std::cosf(currentState.radians),
+                    std::sinf(currentState.radians),
                 }
             };
-            lines.emplace_back(currentState.point, newPointPx);
+            lines.emplace_back(currentState.point, newPointPx, currentState.widthPx);
             currentState.point = newPointPx;
             break;
         }
@@ -142,13 +144,24 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
     return lines;
 }
 
-// NOTE: The origin is bottom left
 auto LSystems::Engine::Application::DrawLine(Line const& line) const noexcept -> void
 {
-    SDL_RenderLine(g_pSDLRenderer,
-        line.p1.x, m_windowDims.y - line.p1.y,
-        line.p2.x, m_windowDims.y - line.p2.y
-    );
+    Vector2f const d{ line.p2.x - line.p1.x, line.p2.y - line.p1.y };
+    float const length{ std::hypot(d.x, d.y) };
+    if (length < 1e-6f) return;// Not drawing if the line is too short
+
+    // Perpendicular unit vector
+    Vector2f const n{ -d.y / length * line.widthPx * 0.5f, d.x / length * line.widthPx * 0.5f };
+
+    // Four corners of the rectangle
+    std::array<SDL_Vertex, 4> const vertices{
+        SDL_Vertex{ { line.p1.x + n.x, m_windowDims.y - (line.p1.y + n.y) }, {255,255,255,255}, {0,0} },
+        { { line.p1.x - n.x, m_windowDims.y - (line.p1.y - n.y) }, {255,255,255,255}, {0,0} },
+        { { line.p2.x + n.x, m_windowDims.y - (line.p2.y + n.y) }, {255,255,255,255}, {0,0} },
+        { { line.p2.x - n.x, m_windowDims.y - (line.p2.y - n.y) }, {255,255,255,255}, {0,0} }
+    };
+    std::array constexpr indices{ 0, 1, 2, 1, 2, 3 };
+    SDL_RenderGeometry(g_pSDLRenderer, nullptr, vertices.data(), 4, indices.data(), 6);
 }
 
 auto LSystems::Engine::Application::DrawCircle(Vector2f const center, float const radius) const noexcept -> void
@@ -184,7 +197,7 @@ auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
     float minX{ lines.front().p1.x }, maxX{ minX },
         minY{ lines.front().p1.y }, maxY{ minY };
 
-    for (auto const& [p1, p2] : lines)
+    for (auto const& [p1, p2, _] : lines)
     {
         for (auto const& [x, y] : { p1, p2 })
         {

@@ -17,6 +17,7 @@ namespace LSystems
     struct Line final
     {
         Vector2f p1{}, p2{};
+        float widthPx{ 1.f };
     };
 }
 
