@@ -6,15 +6,18 @@
 // Standard
 #include <string_view>
 
-namespace LSystems::Engine {
+namespace LSystems
+{
     struct VisualizationData final
     {
         Stages stages;
-        float const lineLengthPx;
-        float const lineWidthPx{5u};
+        float const startingLineLengthPx;
+        // Multiplier/divider for the line length when incrementing/decrementing stage idx
+        float const absLengthScaleFactor;
     };
+}
 
-
+namespace LSystems::Engine {
 
 #pragma region Application
     // The simplest SDL wrapper serving a single-only purpose of visualizing L-systems
@@ -28,14 +31,14 @@ namespace LSystems::Engine {
     private:
         Vector2f m_windowDims;
 
-        auto DrawLSystem(VisualizationData const&, uint32_t stageIdx) const -> void;
+        auto DrawStage(std::string_view stage, float lineLengthPx) const -> void;
 
         auto DrawLine(Vector2f p1, Vector2f p2) const noexcept -> void;
         auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
         auto DrawLinesFromPoints(std::vector<Vector2f> const&) const noexcept -> void;
 
         // Creates points to draw lines inbetween
-        auto GeneratePoints(VisualizationData const&, uint32_t stageIdx) const -> std::vector<Vector2f>;
+        auto GeneratePoints(std::string_view stage, float lineLengthPx) const -> std::vector<Vector2f>;
 
         // Puts the points in a way that the shape they make is centered
         auto CenterPoints(std::vector<Vector2f>& points) const noexcept -> void;

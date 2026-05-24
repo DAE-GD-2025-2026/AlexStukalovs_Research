@@ -36,6 +36,8 @@ LSystems::Engine::Application::Application(std::string_view const name, Vector2f
 
 auto LSystems::Engine::Application::Run(VisualizationData const& data) const noexcept -> void{
     uint32_t stageIdx{};
+    float lineLengthPx{ data.startingLineLengthPx };
+
     while (true) {
 
         // Processing events
@@ -48,13 +50,28 @@ auto LSystems::Engine::Application::Run(VisualizationData const& data) const noe
                     switch (event.key.scancode)
                     {
                         case SDL_SCANCODE_LEFT:
-                            --stageIdx %= data.stages.size();
+                        {
+                            if (stageIdx == 0) break;
+
+                            if ((--stageIdx %= data.stages.size()) == 0)
+                                lineLengthPx = data.startingLineLengthPx;
+                            else
+                                lineLengthPx *= data.absLengthScaleFactor;
                             break;
+                        }
                         case SDL_SCANCODE_RIGHT:
-                            ++stageIdx %= data.stages.size();
-                        break;
+                        {
+                            if (stageIdx == data.stages.size() - 1) break;
+
+                            if ((++stageIdx %= data.stages.size()) == 0)
+                                lineLengthPx = data.startingLineLengthPx;
+                            else
+                                lineLengthPx /= data.absLengthScaleFactor;
+                            break;
+                        }
                         default:;
                     }
+
                     break;
                 default:;
             }
@@ -67,30 +84,27 @@ auto LSystems::Engine::Application::Run(VisualizationData const& data) const noe
         SDL_RenderClear(g_pSDLRenderer);
 
         // Drawing the L-System
-        DrawLSystem(data, stageIdx);
+        DrawStage(data.stages.at(stageIdx), lineLengthPx);
 
         // Showing the new frame
         SDL_RenderPresent(g_pSDLRenderer);
     }
 }
 
-auto LSystems::Engine::Application::DrawLSystem(VisualizationData const& data, uint32_t const stageIdx) const -> void
+auto LSystems::Engine::Application::DrawStage(std::string_view const stage, float const lineLengthPx) const -> void
 {
     SDL_SetRenderDrawColor(g_pSDLRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
-    DrawLinesFromPoints(GeneratePoints(data, stageIdx));
+    DrawLinesFromPoints(GeneratePoints(stage, lineLengthPx));
 }
 
-auto LSystems::Engine::Application::GeneratePoints(VisualizationData const& data, uint32_t const stageIdx) const -> std::vector<Vector2f>
+auto LSystems::Engine::Application::GeneratePoints(std::string_view const stage, float const lineLengthPx) const -> std::vector<Vector2f>
 {
-    assert(stageIdx < data.stages.size() && "Stage index must not be larger than the stage count");
-    std::string_view const stage{ data.stages.at(stageIdx) };
-
     // Generating the points
     float radians{};
     std::vector<Vector2f> points;
     points.reserve(std::ranges::count(stage, 'F'));
     points.emplace_back(Vector2f{});// Starting point = {0, 0}
-    for (char const character : data.stages.at(stageIdx))
+    for (char const character : stage)
     {
         switch (character)
         {
@@ -99,8 +113,8 @@ auto LSystems::Engine::Application::GeneratePoints(VisualizationData const& data
             // Drawing a line in the current direction
             Vector2f const newPointPx {
                 points.back() + Vector2f {
-                    std::cosf(radians) * data.lineLengthPx,
-                    std::sinf(radians) * data.lineLengthPx,
+                    std::cosf(radians) * lineLengthPx,
+                    std::sinf(radians) * lineLengthPx,
                 }
             };
             points.emplace_back(newPointPx);
