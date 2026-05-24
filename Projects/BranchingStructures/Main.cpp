@@ -15,12 +15,12 @@ int main()
     }) };
     VisualizationData constexpr aVisualiztion{
         .startingLineLengthPx = 50.f,
-        .absLengthScaleFactor = 6.f,
+        .absLengthScaleFactor = 100.f,
         .absRadians = Engine::Utils::ToRadians(25.7f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
-    Engine::Application const engine{ "D0L visualizer", {1280, 720} };
+    Engine::Application const engine{ "Branching structures", {1280, 720} };
     engine.Run(
         aStages,
         aVisualiztion

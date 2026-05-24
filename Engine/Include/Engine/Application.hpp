@@ -2,7 +2,7 @@
 #define APPLICATION_HPP
 // Project
 #include "LSystem.hpp"
-#include "Engine/Vector2f.hpp"
+#include "Engine/GeometricPrimitives.hpp"
 // Standard
 #include <string_view>
 
@@ -34,15 +34,14 @@ namespace LSystems::Engine {
 
         auto DrawStage(std::string_view stage, VisualizationData const&) const -> void;
 
-        auto DrawLine(Vector2f p1, Vector2f p2) const noexcept -> void;
+        auto DrawLine(Line const&) const noexcept -> void;
         auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
-        auto DrawLinesFromPoints(std::vector<Vector2f> const&) const noexcept -> void;
 
-        // Creates points to draw lines inbetween
-        [[nodiscard]] auto GeneratePoints(std::string_view stage, VisualizationData const&) const -> std::vector<Vector2f>;
+        // Creates lines out of L-System stage
+        [[nodiscard]] auto GenerateLines(std::string_view stage, VisualizationData const&) const -> std::vector<Line>;
 
-        // Puts the points in a way that the shape they make is centered
-        auto CenterPoints(std::vector<Vector2f>& points) const noexcept -> void;
+        // Puts the line points in a way that the shape they make is centered
+        auto CenterLines(std::vector<Line>& lines) const noexcept -> void;
     };
 
 

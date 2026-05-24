@@ -95,7 +95,7 @@ auto LSystems::Engine::Application::Run(Stages const stages, VisualizationData c
 auto LSystems::Engine::Application::DrawStage(std::string_view const stage, VisualizationData const& data) const -> void
 {
     SDL_SetRenderDrawColor(g_pSDLRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
-    DrawLinesFromPoints(GeneratePoints(stage, data));
+    for (Line const& line : GenerateLines(stage, data)) DrawLine(line);
 }
 
 struct State final
@@ -104,12 +104,12 @@ struct State final
     float radians{}, lineLengthPx{};
 };
 
-auto LSystems::Engine::Application::GeneratePoints(std::string_view const stage, VisualizationData const& data) const -> std::vector<Vector2f>
+auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, VisualizationData const& data) const -> std::vector<Line>
 {
     // Allocating point history
-    std::vector<Vector2f> points;
-    points.reserve(std::ranges::count(stage, 'F'));
-    points.emplace_back(Vector2f{});// Starting point = {0, 0}
+    std::vector<Line> lines;
+    lines.reserve(std::ranges::count(stage, 'F'));
+    lines.emplace_back();// Starting point = {0, 0}
 
     // Allocating state stack
     std::stack<State> savedStates;
@@ -129,7 +129,7 @@ auto LSystems::Engine::Application::GeneratePoints(std::string_view const stage,
                     std::sinf(currentState.radians) * currentState.lineLengthPx,
                 }
             };
-            points.emplace_back(newPointPx);
+            lines.emplace_back(currentState.point, newPointPx);
             currentState.point = newPointPx;
             break;
         }
@@ -152,18 +152,18 @@ auto LSystems::Engine::Application::GeneratePoints(std::string_view const stage,
         }
     }
 
-    CenterPoints(points);
-    return points;
+    CenterLines(lines);
+    return lines;
 }
 
 // NOTE: The origin is bottom left
-auto LSystems::Engine::Application::DrawLine(Vector2f const p1, Vector2f const p2) const noexcept -> void
+auto LSystems::Engine::Application::DrawLine(Line const& line) const noexcept -> void
 {
     SDL_RenderLine(g_pSDLRenderer,
-        p1.x,
-        m_windowDims.y - p1.y,
-        p2.x,
-        m_windowDims.y - p2.y
+        line.p1.x,
+        m_windowDims.y - line.p1.y,
+        line.p2.x,
+        m_windowDims.y - line.p2.y
     );
 }
 
@@ -186,43 +186,41 @@ auto LSystems::Engine::Application::DrawCircle(Vector2f const center, float cons
             p2{ 2.f * pi * static_cast<float>(pointIdx + 1) / static_cast<float>(pointCount) };
 
         // Drawing the circumference segment
-        DrawLine(
+        DrawLine({
             {center.x + radius * cosf(p1), center.y + radius * sinf(p1)},
             {center.x + radius * cosf(p2), center.y + radius * sinf(p2)}
-        );
+        });
     }
 }
 
-auto LSystems::Engine::Application::DrawLinesFromPoints(std::vector<Vector2f> const& points) const noexcept -> void
+auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
 {
-    for (uint32_t const pointIdx : std::ranges::views::iota(1u, points.size()))
-        DrawLine(points[pointIdx - 1], points[pointIdx]);
+    if (lines.empty()) throw std::invalid_argument("Input array must not be empty");
+
+    float minX{ lines.front().p1.x }, maxX{ minX },
+        minY{ lines.front().p1.y }, maxY{ minY };
+
+    for (auto const& [p1, p2] : lines)
+    {
+        for (auto const& [x, y] : { p1, p2 })
+        {
+            minX = std::min(minX, x);  maxX = std::max(maxX, x);
+            minY = std::min(minY, y);  maxY = std::max(maxY, y);
+        }
+    }
+
+    return SDL_FRect{ minX, minY, maxX - minX, maxY - minY };
 }
 
-auto GetAABB(std::vector<LSystems::Vector2f> const& points) -> SDL_FRect
+auto LSystems::Engine::Application::CenterLines(std::vector<Line>& lines) const noexcept -> void
 {
-    if (points.empty()) throw std::invalid_argument("Points is an empty array");
-
-    auto const xExtremes{ std::ranges::minmax(points, {}, &LSystems::Vector2f::x) },
-        yExtremes{ std::ranges::minmax(points, {}, &LSystems::Vector2f::y) };
-
-    float const left{ xExtremes.min.x },
-        top{ yExtremes.min.y },
-        right{ xExtremes.max.x },
-        bottom{ yExtremes.max.y };
-
-    return SDL_FRect{ left, top, right - left, bottom - top };
-}
-
-auto LSystems::Engine::Application::CenterPoints(std::vector<Vector2f>& points) const noexcept -> void
-{
-    const auto [x, y, w, h]{ GetAABB(points) };
+    auto const [x, y, w, h]{ GetAABB(lines) };
     Vector2f const aabbCenter{ x + 0.5f * w, y + 0.5f * h },
         offsetVector{ 0.5f * m_windowDims - aabbCenter };
 
-    std::ranges::transform(points, points.begin(), [&offsetVector](Vector2f const& p)
+    std::ranges::transform(lines, lines.begin(), [&offsetVector](Line const& line) -> Line
     {
-        return p + offsetVector;
+        return Line(line.p1 + offsetVector, line.p2 + offsetVector);
     });
 }
 
