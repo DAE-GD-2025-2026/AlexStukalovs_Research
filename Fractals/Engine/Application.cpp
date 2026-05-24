@@ -5,6 +5,7 @@
 #include "SDL3/SDL.h"
 // Standard
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <format>
 #include <ranges>
@@ -33,7 +34,8 @@ LSystems::Engine::Application::Application(std::string_view const name, Vector2f
     );
 }
 
-auto LSystems::Engine::Application::Run(VisualizationData const& data) noexcept -> void{
+auto LSystems::Engine::Application::Run(VisualizationData const& data) const noexcept -> void{
+    uint32_t stageIdx{};
     while (true) {
 
         // Processing events
@@ -42,6 +44,18 @@ auto LSystems::Engine::Application::Run(VisualizationData const& data) noexcept 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_EVENT_QUIT: return;
+                case SDL_EVENT_KEY_UP:
+                    switch (event.key.scancode)
+                    {
+                        case SDL_SCANCODE_LEFT:
+                            --stageIdx %= data.stages.size();
+                            break;
+                        case SDL_SCANCODE_RIGHT:
+                            ++stageIdx %= data.stages.size();
+                        break;
+                        default:;
+                    }
+                    break;
                 default:;
             }
         }
@@ -53,28 +67,30 @@ auto LSystems::Engine::Application::Run(VisualizationData const& data) noexcept 
         SDL_RenderClear(g_pSDLRenderer);
 
         // Drawing the L-System
-        DrawLSystem(data);
+        DrawLSystem(data, stageIdx);
 
         // Showing the new frame
         SDL_RenderPresent(g_pSDLRenderer);
     }
 }
 
-
-auto LSystems::Engine::Application::DrawLSystem(VisualizationData const& data) const -> void
+auto LSystems::Engine::Application::DrawLSystem(VisualizationData const& data, uint32_t const stageIdx) const -> void
 {
     SDL_SetRenderDrawColor(g_pSDLRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
-    DrawLinesFromPoints(GeneratePoints(data));
+    DrawLinesFromPoints(GeneratePoints(data, stageIdx));
 }
 
-auto LSystems::Engine::Application::GeneratePoints(VisualizationData const& data) const -> std::vector<Vector2f>
+auto LSystems::Engine::Application::GeneratePoints(VisualizationData const& data, uint32_t const stageIdx) const -> std::vector<Vector2f>
 {
+    assert(stageIdx < data.stages.size() && "Stage index must not be larger than the stage count");
+    std::string_view const stage{ data.stages.at(stageIdx) };
+
     // Generating the points
     float radians{};
     std::vector<Vector2f> points;
-    points.reserve(std::ranges::count(data.stage, 'F'));
+    points.reserve(std::ranges::count(stage, 'F'));
     points.emplace_back(Vector2f{});// Starting point = {0, 0}
-    for (char const character : data.stage)
+    for (char const character : data.stages.at(stageIdx))
     {
         switch (character)
         {

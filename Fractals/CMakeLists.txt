@@ -16,6 +16,7 @@ message(${SOURCES})
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Dependencies
+
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -23,9 +24,22 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE# Displaying cloning process in terminal
 )
-FetchContent_MakeAvailable(SDL3)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE D0L_LIB SDL3::SDL3)
+FetchContent_Declare(
+    SDL3_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG release-3.2.2
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+FetchContent_MakeAvailable(SDL3 SDL3_ttf)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    D0L_LIB
+    SDL3::SDL3
+    SDL3_ttf::SDL3_ttf
+)
 
 # Copying SDL to the project's dir
 add_custom_command(

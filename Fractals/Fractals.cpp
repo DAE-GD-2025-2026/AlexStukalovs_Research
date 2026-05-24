@@ -17,18 +17,19 @@ void LSystems::RunD0LVisualizer() {
     //     LSystems::GenerateStages(d0l)
     // };
 
-    Vector2f constexpr windowDims{ 1280, 720 };
-
     Stages const stages{ GenerateStages(D0L{
         .axiom = "F-F-F-F",
         .rules = Rules{Rule{ 'F', "F-F+F+FF-F-F+F" }},
         .stageCount = 2
     }) };
 
-    Engine::Application engine{ "D0L visualizer", windowDims };
-    float constexpr lineLengthPx{ 25.f };
+    Engine::Application const engine{ "D0L visualizer", {1280, 720} };
     engine.Run(Engine::VisualizationData{
-        .stage = stages.back(),
-        .lineLengthPx = lineLengthPx
+        .stages = stages,
+        .lineLengthPx = 25.f
     });
+
+    // I have multiple stages, I want to depict them all
+    // I want to switch between stages using left and right keys
+
 }
