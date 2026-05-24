@@ -37,7 +37,6 @@ LSystems::Engine::Application::Application(std::string_view const name, Vector2f
 
 auto LSystems::Engine::Application::Run(Stages const stages, VisualizationData const& data) const noexcept -> void{
     uint32_t stageIdx{};
-    float lineLengthPx{ data.startingLineLengthPx };
 
     while (true) {
 
@@ -51,28 +50,13 @@ auto LSystems::Engine::Application::Run(Stages const stages, VisualizationData c
                     switch (event.key.scancode)
                     {
                         case SDL_SCANCODE_LEFT:
-                        {
-                            if (stageIdx == 0) break;
-
-                            if ((--stageIdx %= stages.size()) == 0)
-                                lineLengthPx = data.startingLineLengthPx;
-                            else
-                                lineLengthPx *= data.absLengthScaleFactor;
+                            if (stageIdx > 0) --stageIdx;
                             break;
-                        }
                         case SDL_SCANCODE_RIGHT:
-                        {
-                            if (stageIdx == stages.size() - 1) break;
-
-                            if ((++stageIdx %= stages.size()) == 0)
-                                lineLengthPx = data.startingLineLengthPx;
-                            else
-                                lineLengthPx /= data.absLengthScaleFactor;
+                            if (stageIdx < stages.size() - 1) ++stageIdx;
                             break;
-                        }
                         default:;
                     }
-
                     break;
                 default:;
             }
@@ -95,13 +79,16 @@ auto LSystems::Engine::Application::Run(Stages const stages, VisualizationData c
 auto LSystems::Engine::Application::DrawStage(std::string_view const stage, VisualizationData const& data) const -> void
 {
     SDL_SetRenderDrawColor(g_pSDLRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
-    for (Line const& line : GenerateLines(stage, data)) DrawLine(line);
+    auto lines{ GenerateLines(stage, data) };
+    FitLinesToScreen(lines);
+    for (Line const& line : lines) DrawLine(line);
 }
 
 struct State final
 {
     LSystems::Vector2f point{};
-    float radians{}, lineLengthPx{};
+    float radians{},
+        relativeLength{};// from 1 to 0, where 1 is the longest it can get
 };
 
 auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, VisualizationData const& data) const -> std::vector<Line>
@@ -109,11 +96,10 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
     // Allocating point history
     std::vector<Line> lines;
     lines.reserve(std::ranges::count(stage, 'F'));
-    lines.emplace_back();// Starting point = {0, 0}
 
     // Allocating state stack
     std::stack<State> savedStates;
-    State currentState{{}, data.startRadians, data.startingLineLengthPx};
+    State currentState{{}, data.startRadians, 1.f};
 
     // Generating the points
     for (char const character : stage)
@@ -125,8 +111,8 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
             // Drawing a line in the current direction
             Vector2f const newPointPx {
                 currentState.point + Vector2f {
-                    std::cosf(currentState.radians) * currentState.lineLengthPx,
-                    std::sinf(currentState.radians) * currentState.lineLengthPx,
+                    std::cosf(currentState.radians) * currentState.relativeLength,
+                    std::sinf(currentState.radians) * currentState.relativeLength,
                 }
             };
             lines.emplace_back(currentState.point, newPointPx);
@@ -152,7 +138,6 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
         }
     }
 
-    CenterLines(lines);
     return lines;
 }
 
@@ -160,10 +145,8 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
 auto LSystems::Engine::Application::DrawLine(Line const& line) const noexcept -> void
 {
     SDL_RenderLine(g_pSDLRenderer,
-        line.p1.x,
-        m_windowDims.y - line.p1.y,
-        line.p2.x,
-        m_windowDims.y - line.p2.y
+        line.p1.x, m_windowDims.y - line.p1.y,
+        line.p2.x, m_windowDims.y - line.p2.y
     );
 }
 
@@ -212,15 +195,29 @@ auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
     return SDL_FRect{ minX, minY, maxX - minX, maxY - minY };
 }
 
-auto LSystems::Engine::Application::CenterLines(std::vector<Line>& lines) const noexcept -> void
+auto LSystems::Engine::Application::FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void
 {
-    auto const [x, y, w, h]{ GetAABB(lines) };
-    Vector2f const aabbCenter{ x + 0.5f * w, y + 0.5f * h },
-        offsetVector{ 0.5f * m_windowDims - aabbCenter };
+    float constexpr padding{ 20.f };// px of margin on each side
 
-    std::ranges::transform(lines, lines.begin(), [&offsetVector](Line const& line) -> Line
-    {
-        return Line(line.p1 + offsetVector, line.p2 + offsetVector);
+    auto const [x, y, w, h]{ GetAABB(lines) };
+
+    // Centering the AABB at the origin first
+    Vector2f const aabbCenter{ x + 0.5f * w, y + 0.5f * h },
+    windowCenter{ 0.5f * m_windowDims };
+
+    // Scaling uniformly so the larger AABB dimension fills the window minus padding
+    float const availableW{ m_windowDims.x - 2.f * padding };
+    float const availableH{ m_windowDims.y - 2.f * padding };
+    float const scale{ w > 0.f && h > 0.f
+        ? std::min(availableW / w, availableH / h)
+        : 1.f };
+
+    std::ranges::transform(lines, lines.begin(), [&](Line const& line) -> Line {
+        // Translating so AABB center is at window center, then scaling around window center
+        auto fit{ [&](Vector2f const& p) -> Vector2f {
+            return windowCenter + scale * (p - aabbCenter);
+        }};
+        return Line{ fit(line.p1), fit(line.p2) };
     });
 }
 

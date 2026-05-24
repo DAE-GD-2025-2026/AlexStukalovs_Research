@@ -10,11 +10,9 @@ namespace LSystems
 {
     struct VisualizationData final
     {
-        float const startingLineLengthPx;
-        // Multiplier/divider for the line length when incrementing/decrementing stage idx
-        float const absLengthScaleFactor;
         // The rotation by which + or - will turn
-        float absRadians, startRadians{};
+        float absRadians;
+        float startRadians{};
     };
 }
 
@@ -40,8 +38,8 @@ namespace LSystems::Engine {
         // Creates lines out of L-System stage
         [[nodiscard]] auto GenerateLines(std::string_view stage, VisualizationData const&) const -> std::vector<Line>;
 
-        // Puts the line points in a way that the shape they make is centered
-        auto CenterLines(std::vector<Line>& lines) const noexcept -> void;
+        // Centers and scales lines so the whole L-system fills the window
+        auto FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void;
     };
 
 
