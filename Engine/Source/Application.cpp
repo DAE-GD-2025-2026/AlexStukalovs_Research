@@ -37,12 +37,12 @@ LSystems::Engine::Application::Application(std::string_view const name, Vector2f
 }
 
 auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void{
-    uint32_t stageIdx{};
+    uint32_t selectedStageIdx{};// Stage that user observes
 
     // Generating lines for all stages
     std::vector<std::vector<Line>> stageLines(stages.size());
     std::ranges::transform(stages, stageLines.begin(),
-        [this, &data](Stage const& stage) { return GenerateLines(stage, data); });
+        [&](Stage const& stage) { return GenerateLines(stage, data); });
 
     // Running the app loop
     while (true) {
@@ -57,10 +57,10 @@ auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData 
                     switch (event.key.scancode)
                     {
                         case SDL_SCANCODE_LEFT:
-                            if (stageIdx > 0) --stageIdx;
+                            if (selectedStageIdx > 0) --selectedStageIdx;
                             break;
                         case SDL_SCANCODE_RIGHT:
-                            if (stageIdx < stages.size() - 1) ++stageIdx;
+                            if (selectedStageIdx < stages.size() - 1) ++selectedStageIdx;
                             break;
                         default:;
                     }
@@ -71,12 +71,12 @@ auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData 
 
         // Rendering
 
-        // Clearing the background with black
+       // Clearing the background with black
         SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(g_pSDLRenderer);
 
         // Drawing the L-System
-        DrawLines(stageLines.at(stageIdx));
+        DrawLines(stageLines.at(selectedStageIdx));
 
         // Showing the new frame
         SDL_RenderPresent(g_pSDLRenderer);
@@ -93,8 +93,9 @@ struct State final
 {
     LSystems::Vector2f point{};
     float radians{},
-        relativeLength{},// from 1 to 0, where 1 is the longest it can get
+        lengthPx{},// from 1 to 0, where 1 is the longest it can get
         widthPx{ 1.f };
+    uint32_t stateIdx{};
 };
 
 auto LSystems::Engine::Application::GenerateLines(Stage const& stage, VisualizationData const& data) const -> std::vector<Line>
@@ -105,7 +106,7 @@ auto LSystems::Engine::Application::GenerateLines(Stage const& stage, Visualizat
 
     // Allocating state stack
     std::stack<State> savedStates;
-    State currentState{{}, data.startRadians, 1.f, data.startWidthPx};
+    State currentState{{}, data.startRadians, data.startLengthPx, data.widthPx};
 
     // Generating the points
     for (char const character : stage)
@@ -114,26 +115,43 @@ auto LSystems::Engine::Application::GenerateLines(Stage const& stage, Visualizat
         {
         case 'F':
         {
+            // Randomizing length around the base length for this stage
+            float segmentLength{ currentState.lengthPx };
+            if (data.divideLengthByStage) segmentLength /= static_cast<float>(currentState.stateIdx + 1);
+            if (data.absLengthAddend > 0.f) segmentLength += Utils::GetRandFloatInRange(-data.absLengthAddend, data.absLengthAddend);
+
             // Drawing a line in the current direction
             Vector2f const newPointPx {
-                currentState.point + currentState.relativeLength * Vector2f {
+                currentState.point + segmentLength * Vector2f {
                     std::cosf(currentState.radians),
                     std::sinf(currentState.radians),
                 }
             };
             lines.emplace_back(currentState.point, newPointPx, currentState.widthPx);
+
+            // Updating the state
             currentState.point = newPointPx;
-            currentState.relativeLength /= data.lengthFactor;
+            ++currentState.stateIdx;
+
             break;
         }
         case '+':// "Turning left"
-            currentState.radians += Utils::GetRandFloatInRange(data.absRadiansFrom, data.absRadiansTo);
+            currentState.radians += Utils::GetRandFloatInRange(
+                data.absRadians - data.absRadiansAddend,
+                data.absRadians + data.absRadiansAddend
+            );
             break;
         case '-':// "Turning right"
-            currentState.radians -= data.absRadiansFrom;
+            currentState.radians -= Utils::GetRandFloatInRange(
+                data.absRadians - data.absRadiansAddend,
+                data.absRadians + data.absRadiansAddend
+            );
             break;
         case '[':// Pushing the state to the stack
             savedStates.push(currentState);
+            // Dividing base width by stage idx if requested
+            if (data.divideWidthByStage)
+                currentState.widthPx = std::max(1.f, currentState.widthPx / static_cast<float>(savedStates.size() + 1));
             break;
         case ']':// Popping the state from the stack
             if (savedStates.empty()) break;
@@ -239,7 +257,7 @@ auto LSystems::Engine::Application::FitLinesToScreen(std::vector<Line>& lines) c
         auto fit{ [&](Vector2f const& p) -> Vector2f {
             return windowCenter + scale * (p - aabbCenter);
         }};
-        return Line{ fit(line.p1), fit(line.p2) };
+        return Line{ fit(line.p1), fit(line.p2), line.widthPx};
     });
 }
 

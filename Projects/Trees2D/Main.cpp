@@ -10,49 +10,60 @@ int main()
 {
     using namespace LSystems;
 
-    Stages const hexagonStages{ GenerateStages(LSystem{
-        .axiom = "L",
-        .rules = {{ 'L', "F[-L]+L" }},
-        .stageCount = 15,
-    }) };
-    VisualizationData constexpr hexagonVisualization{
-        .absRadiansFrom= Engine::Utils::ToRadians(30.f),
-        // .absRadiansFrom= Engine::Utils::ToRadians(60.f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
-    };
-
-    Stages const snailStages{ GenerateStages(LSystem{
-        .axiom = "L",
-        .rules = {{ 'L', "[-FL]" }},
-        .stageCount = 50,
-    }) };
-    VisualizationData const snailVisualization{
-        .absRadiansFrom= Engine::Utils::ToRadians(90.f),
-        .startRadians = 0.f,
-        .lengthFactor = std::sqrtf(2.f),
-    };
-
-    Stages const hTreeStages{ GenerateStages(LSystem{
-        .axiom = "L",
-        .rules = {{ 'L', "[-FL][+FL]" }},
-        .stageCount = 15,
-    }) };
-    VisualizationData const hTreeVisualization{
-        .absRadiansFrom= Engine::Utils::ToRadians(90.f),
-        .startRadians = Engine::Utils::ToRadians(90.f),
-        .lengthFactor = std::sqrtf(2.f),
-    };
+    // Stages const hexagonStages{ GenerateStages(LSystem{
+    //     .axiom = "L",
+    //     .rules = {{ 'L', "F[-L]+L" }},
+    //     .stageCount = 15,
+    // }) };
+    // VisualizationData constexpr hexagonVisualization{
+    //     .absRadiansFrom= Engine::Utils::ToRadians(30.f),
+    //     // .absRadiansFrom= Engine::Utils::ToRadians(60.f),
+    //     .startRadians = Engine::Utils::ToRadians(90.f)
+    // };
+    //
+    // Stages const snailStages{ GenerateStages(LSystem{
+    //     .axiom = "L",
+    //     .rules = {{ 'L', "[-FL]" }},
+    //     .stageCount = 50,
+    // }) };
+    // VisualizationData const snailVisualization{
+    //     .absRadiansFrom= Engine::Utils::ToRadians(90.f),
+    //     .startRadians = 0.f,
+    //     .lengthFactor = std::sqrtf(2.f),
+    // };
+    //
+    // Stages const hTreeStages{ GenerateStages(LSystem{
+    //     .axiom = "L",
+    //     .rules = {{ 'L', "[-FL][+FL]" }},
+    //     .stageCount = 15,
+    // }) };
+    // VisualizationData const hTreeVisualization{
+    //     .absRadiansFrom= Engine::Utils::ToRadians(90.f),
+    //     .startRadians = Engine::Utils::ToRadians(90.f),
+    //     .lengthFactor = std::sqrtf(2.f),
+    // };
 
     Stages const tree2DStages{ GenerateStages(LSystem{
-        .axiom = "L",
-        .rules = {{ 'L', "F[+[-L]+[+L]+][-[+L]-[-L]-]" }},
-        .stageCount = 5,
+        .axiom = "FL",
+        // .rules = {{ "L(g)", R"(
+        //                     F(Rand(100/(g+1)-10, 100/(g+1)+10), 5/(g+1))
+        //                     [R(Rand(-20-5, -20+5))L(g+1)]
+        //                     [R(Rand(20-5, 20+5))L(g+1)]
+        //                     )" }},
+        .rules = {{'L', "[-FL][+FL]"}},
+        .stageCount = 15,
     }) };
-    VisualizationData const tree2DVisualization{
-        .absRadiansFrom = Engine::Utils::ToRadians(15.f),
-        .absRadiansTo = Engine::Utils::ToRadians(25.f),
+    VisualizationData constexpr tree2DVisualization{
         .startRadians = Engine::Utils::ToRadians(90.f),
-        .lengthFactor = std::sqrtf(2.f),
+        .absRadians = Engine::Utils::ToRadians(20.f),
+        .absRadiansAddend = Engine::Utils::ToRadians(5.f),
+
+        .startLengthPx = 100.f,
+        .divideLengthByStage = true,
+        .absLengthAddend = 10,
+
+        .widthPx = 5.f,
+        .divideWidthByStage = true,
     };
 
     Engine::Application const engine{ "2D trees", {720, 720} };

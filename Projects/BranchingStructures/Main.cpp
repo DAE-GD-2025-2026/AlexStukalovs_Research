@@ -15,7 +15,7 @@ int main()
     }) };
     VisualizationData constexpr aVisualiztion{
         .absRadiansFrom= Engine::Utils::ToRadians(25.7f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
+        .absRadians = Engine::Utils::ToRadians(90.f)
     };
 
     Stages const bStages{ GenerateStages(LSystem{
@@ -25,7 +25,7 @@ int main()
     })};
     VisualizationData constexpr bVisualiztion{
         .absRadiansFrom= Engine::Utils::ToRadians(20.f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
+        .absRadians = Engine::Utils::ToRadians(90.f)
     };
 
     Stages const cStages{ GenerateStages(LSystem{
@@ -35,7 +35,7 @@ int main()
     })};
     VisualizationData constexpr cVisualiztion{
         .absRadiansFrom= Engine::Utils::ToRadians(22.5f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
+        .absRadians = Engine::Utils::ToRadians(90.f)
     };
 
     Stages const dStages{ GenerateStages(LSystem{
@@ -48,7 +48,7 @@ int main()
     })};
     VisualizationData constexpr dVisualiztion{
         .absRadiansFrom= Engine::Utils::ToRadians(20.f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
+        .absRadians = Engine::Utils::ToRadians(90.f)
     };
 
     Stages const eStages{ GenerateStages(LSystem{
@@ -61,7 +61,7 @@ int main()
     })};
     VisualizationData constexpr eVisualiztion{
         .absRadiansFrom= Engine::Utils::ToRadians(25.7f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
+        .absRadians = Engine::Utils::ToRadians(90.f)
     };
 
     Stages const fStages{ GenerateStages(LSystem{
@@ -74,7 +74,7 @@ int main()
     })};
     VisualizationData constexpr fVisualiztion{
         .absRadiansFrom= Engine::Utils::ToRadians(22.5f),
-        .startRadians = Engine::Utils::ToRadians(90.f)
+        .absRadians = Engine::Utils::ToRadians(90.f)
     };
 
     Engine::Application const engine{ "Branching structures", {720, 720} };
