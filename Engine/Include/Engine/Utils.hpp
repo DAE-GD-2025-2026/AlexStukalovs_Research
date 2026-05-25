@@ -6,6 +6,7 @@
 #include <format>
 #include <stdexcept>
 #include <string_view>
+#include <random>
 
 namespace LSystems::Engine::Utils
 {
@@ -21,6 +22,12 @@ namespace LSystems::Engine::Utils
 
     constexpr auto ToRadians(float const degrees) noexcept -> float {
         return degrees * std::numbers::pi_v<float> / 180.f;
+    }
+
+    inline float GetRandFloatInRange(float const min, float const max) {
+        static std::mt19937 rng{std::random_device{}()};
+        std::uniform_real_distribution dist(min, max);
+        return dist(rng);
     }
 
 }

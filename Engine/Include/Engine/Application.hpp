@@ -11,7 +11,7 @@ namespace LSystems
     struct VisualizationData final
     {
         // The rotation by which + or - will turn
-        float absRadians{};
+        float absRadiansFrom{}, absRadiansTo{ absRadiansFrom };
         float startRadians{};
         float lengthFactor{ 1.f }; // multiplied on every [
         float startWidthPx{ 1.f };

@@ -14,7 +14,7 @@ int main()
         .stageCount = 5,
     }) };
     VisualizationData constexpr aVisualiztion{
-        .absRadians = Engine::Utils::ToRadians(25.7f),
+        .absRadiansFrom= Engine::Utils::ToRadians(25.7f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
@@ -24,7 +24,7 @@ int main()
         .stageCount = 5
     })};
     VisualizationData constexpr bVisualiztion{
-        .absRadians = Engine::Utils::ToRadians(20.f),
+        .absRadiansFrom= Engine::Utils::ToRadians(20.f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
@@ -34,7 +34,7 @@ int main()
         .stageCount = 4
     })};
     VisualizationData constexpr cVisualiztion{
-        .absRadians = Engine::Utils::ToRadians(22.5f),
+        .absRadiansFrom= Engine::Utils::ToRadians(22.5f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
@@ -47,7 +47,7 @@ int main()
         .stageCount = 7
     })};
     VisualizationData constexpr dVisualiztion{
-        .absRadians = Engine::Utils::ToRadians(20.f),
+        .absRadiansFrom= Engine::Utils::ToRadians(20.f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
@@ -60,7 +60,7 @@ int main()
         .stageCount = 7
     })};
     VisualizationData constexpr eVisualiztion{
-        .absRadians = Engine::Utils::ToRadians(25.7f),
+        .absRadiansFrom= Engine::Utils::ToRadians(25.7f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
@@ -73,7 +73,7 @@ int main()
         .stageCount = 5
     })};
     VisualizationData constexpr fVisualiztion{
-        .absRadians = Engine::Utils::ToRadians(22.5f),
+        .absRadiansFrom= Engine::Utils::ToRadians(22.5f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 

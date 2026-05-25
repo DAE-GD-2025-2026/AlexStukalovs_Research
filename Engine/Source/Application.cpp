@@ -127,10 +127,10 @@ auto LSystems::Engine::Application::GenerateLines(Stage const& stage, Visualizat
             break;
         }
         case '+':// "Turning left"
-            currentState.radians += data.absRadians;
+            currentState.radians += Utils::GetRandFloatInRange(data.absRadiansFrom, data.absRadiansTo);
             break;
         case '-':// "Turning right"
-            currentState.radians -= data.absRadians;
+            currentState.radians -= data.absRadiansFrom;
             break;
         case '[':// Pushing the state to the stack
             savedStates.push(currentState);

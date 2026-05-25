@@ -34,8 +34,8 @@ int main()
     Engine::Application const engine{ "D0L visualizer", {1280, 720} };
     engine.Run(
         kochIslandStages,
-        {
-            .absRadians = 0.5f * std::numbers::pi_v<float>
-         }
+        VisualizationData{
+            .absRadiansFrom = 0.5f * std::numbers::pi_v<float>,
+        }
     );
 }

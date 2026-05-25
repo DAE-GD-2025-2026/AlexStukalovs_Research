@@ -16,8 +16,8 @@ int main()
         .stageCount = 15,
     }) };
     VisualizationData constexpr hexagonVisualization{
-        .absRadians = Engine::Utils::ToRadians(30.f),
-        // .absRadians = Engine::Utils::ToRadians(60.f),
+        .absRadiansFrom= Engine::Utils::ToRadians(30.f),
+        // .absRadiansFrom= Engine::Utils::ToRadians(60.f),
         .startRadians = Engine::Utils::ToRadians(90.f)
     };
 
@@ -27,7 +27,7 @@ int main()
         .stageCount = 50,
     }) };
     VisualizationData const snailVisualization{
-        .absRadians = Engine::Utils::ToRadians(90.f),
+        .absRadiansFrom= Engine::Utils::ToRadians(90.f),
         .startRadians = 0.f,
         .lengthFactor = std::sqrtf(2.f),
     };
@@ -38,16 +38,28 @@ int main()
         .stageCount = 15,
     }) };
     VisualizationData const hTreeVisualization{
-        .absRadians = Engine::Utils::ToRadians(90.f),
+        .absRadiansFrom= Engine::Utils::ToRadians(90.f),
         .startRadians = Engine::Utils::ToRadians(90.f),
         .lengthFactor = std::sqrtf(2.f),
     };
 
+    Stages const tree2DStages{ GenerateStages(LSystem{
+        .axiom = "L",
+        .rules = {{ 'L', "F[+[-L]+[+L]+][-[+L]-[-L]-]" }},
+        .stageCount = 5,
+    }) };
+    VisualizationData const tree2DVisualization{
+        .absRadiansFrom = Engine::Utils::ToRadians(15.f),
+        .absRadiansTo = Engine::Utils::ToRadians(25.f),
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .lengthFactor = std::sqrtf(2.f),
+    };
 
     Engine::Application const engine{ "2D trees", {720, 720} };
     engine.Run(
         // snailStages,snailVisualization
-        hTreeStages, hTreeVisualization
+        // hTreeStages, hTreeVisualization
+        tree2DStages, tree2DVisualization
     );
 
     // Further reading
