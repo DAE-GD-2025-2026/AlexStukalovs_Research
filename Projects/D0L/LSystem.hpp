@@ -12,7 +12,8 @@ namespace LSystems
 {
     using Rule = std::pair<char, std::string>;
     using Rules = std::unordered_map<char, std::string>;
-    using Stages = std::vector<std::string>;
+    using Stage = std::string;
+    using Stages = std::vector<Stage>;
     using ErrorMessage = std::string;
 
     struct LSystem final {

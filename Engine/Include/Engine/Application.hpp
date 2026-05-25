@@ -13,9 +13,9 @@ namespace LSystems
         // The rotation by which + or - will turn
         float absRadians{};
         float startRadians{};
-        float trunkWidth{ 18.f };
-        float branchWidthFactor{ 0.62f };  // multiplied on every [
-        float branchLengthFactor{ 0.72f }; // multiplied on every [
+        float lengthFactor{ 1.f }; // multiplied on every [
+        float startWidthPx{ 1.f };
+        float widthFactor{ 1.f };  // multiplied on every [
     };
 }
 
@@ -28,18 +28,18 @@ namespace LSystems::Engine {
         explicit Application(std::string_view name, Vector2f windowDims);
 
         // Draws the L-system and quits if Escape is pressed
-        auto Run(Stages, VisualizationData const&) const noexcept -> void;
+        auto Run(Stages const&, VisualizationData const&) const noexcept -> void;
 
     private:
         Vector2f m_windowDims;
 
-        auto DrawStage(std::string_view stage, VisualizationData const&) const -> void;
+        auto DrawLines(std::vector<Line> const&) const -> void;
 
         auto DrawLine(Line const&) const noexcept -> void;
         auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
 
         // Creates lines out of L-System stage
-        [[nodiscard]] static auto GenerateLines(std::string_view stage, VisualizationData const&) -> std::vector<Line>;
+        [[nodiscard]] auto GenerateLines(Stage const&, VisualizationData const&) const -> std::vector<Line>;
 
         // Centers and scales lines so the whole L-system fills the window
         auto FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void;

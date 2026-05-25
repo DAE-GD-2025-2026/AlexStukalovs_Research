@@ -36,9 +36,15 @@ LSystems::Engine::Application::Application(std::string_view const name, Vector2f
     );
 }
 
-auto LSystems::Engine::Application::Run(Stages const stages, VisualizationData const& data) const noexcept -> void{
+auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void{
     uint32_t stageIdx{};
 
+    // Generating lines for all stages
+    std::vector<std::vector<Line>> stageLines(stages.size());
+    std::ranges::transform(stages, stageLines.begin(),
+        [this, &data](Stage const& stage) { return GenerateLines(stage, data); });
+
+    // Running the app loop
     while (true) {
 
         // Processing events
@@ -70,18 +76,16 @@ auto LSystems::Engine::Application::Run(Stages const stages, VisualizationData c
         SDL_RenderClear(g_pSDLRenderer);
 
         // Drawing the L-System
-        DrawStage(stages.at(stageIdx), data);
+        DrawLines(stageLines.at(stageIdx));
 
         // Showing the new frame
         SDL_RenderPresent(g_pSDLRenderer);
     }
 }
 
-auto LSystems::Engine::Application::DrawStage(std::string_view const stage, VisualizationData const& data) const -> void
+auto LSystems::Engine::Application::DrawLines(std::vector<Line> const& lines) const -> void
 {
     SDL_SetRenderDrawColor(g_pSDLRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
-    auto lines{ GenerateLines(stage, data) };
-    FitLinesToScreen(lines);
     for (Line const& line : lines) DrawLine(line);
 }
 
@@ -93,7 +97,7 @@ struct State final
         widthPx{ 1.f };
 };
 
-auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, VisualizationData const& data) -> std::vector<Line>
+auto LSystems::Engine::Application::GenerateLines(Stage const& stage, VisualizationData const& data) const -> std::vector<Line>
 {
     // Allocating point history
     std::vector<Line> lines;
@@ -101,7 +105,7 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
 
     // Allocating state stack
     std::stack<State> savedStates;
-    State currentState{{}, data.startRadians, 1.f, data.trunkWidth};
+    State currentState{{}, data.startRadians, 1.f, data.startWidthPx};
 
     // Generating the points
     for (char const character : stage)
@@ -112,13 +116,14 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
         {
             // Drawing a line in the current direction
             Vector2f const newPointPx {
-                currentState.point + Vector2f {
+                currentState.point + currentState.relativeLength * Vector2f {
                     std::cosf(currentState.radians),
                     std::sinf(currentState.radians),
                 }
             };
             lines.emplace_back(currentState.point, newPointPx, currentState.widthPx);
             currentState.point = newPointPx;
+            currentState.relativeLength /= data.lengthFactor;
             break;
         }
         case '+':// "Turning left"
@@ -140,6 +145,8 @@ auto LSystems::Engine::Application::GenerateLines(std::string_view const stage, 
             break;
         }
     }
+
+    FitLinesToScreen(lines);
 
     return lines;
 }
