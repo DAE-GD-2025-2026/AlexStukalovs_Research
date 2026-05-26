@@ -79,7 +79,7 @@ namespace LSystems::Engine
         Impl& operator=(Impl const&) noexcept = delete;
         Impl& operator=(Impl &&) noexcept = delete;
 
-        auto Run(Stages const&, VisualizationData const&) noexcept -> void;
+        auto Run(std::vector<LSystemData> const&) noexcept -> void;
 
     private:
         Vector2f const m_windowDims{ 1280.f, 720.f };
@@ -122,6 +122,11 @@ namespace LSystems::Engine
             m_pStageTextTexture = CreateTextTexture( std::format("Stage {}/{}", stageIdx, stageCount), m_pFont_primary, m_textColor_primary);
             assert(m_pStageTextTexture);
         }
+        void UpdateLSystemText(uint32_t const lSystemIdx, uint32_t const lSystemCount, std::string_view const lSystemName)
+        {
+            m_pNameTextTexture = CreateTextTexture( std::format("L-system {}/{}: {}", lSystemIdx+1, lSystemCount, lSystemName), m_pFont_primary, m_textColor_primary);
+            assert(m_pNameTextTexture);
+        }
 #pragma endregion Text
 
 #pragma region Drawing
@@ -144,20 +149,25 @@ LSystems::Engine::Application::Application(std::string_view const name)
 
 LSystems::Engine::Application::~Application() = default;// External for pimpl to work
 
-auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) noexcept -> void
+auto LSystems::Engine::Application::Run(std::vector<LSystemData> const& lsystemData) noexcept -> void
 {
-    m_pImpl->Run(stages, data);
+    m_pImpl->Run(lsystemData);
 }
 
-auto LSystems::Engine::Application::Impl::Run(Stages const& stages, VisualizationData const& data) noexcept -> void{
+auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& lsystemData) noexcept -> void{
+    // L-systems
+    uint32_t currentLsystemIdx{};// L-system that user observes
+    UpdateLSystemText(currentLsystemIdx, lsystemData.size(), lsystemData.at(currentLsystemIdx).name);
+    Stages currentStages{ lsystemData.at(currentLsystemIdx).stages };
     // Stages
-    uint32_t selectedStageIdx{};// Stage that user observes
-    UpdateStageText(selectedStageIdx+1, stages.size());
+    uint32_t currentStageIdx{};// Stage that user observes
+    Stage const& currentStage{ lsystemData.at(currentStageIdx).stages.at(currentStageIdx) };
+    UpdateStageText(currentStageIdx+1, currentStage.size());
     m_stageTextDst = { 10.f, m_windowDims.y - 60.f, static_cast<float>(m_pStageTextTexture->w), static_cast<float>(m_pStageTextTexture->h) };
     // Generating lines for all stages
-    std::vector<std::vector<Line>> stageLines(stages.size());
-    std::ranges::transform(stages, stageLines.begin(),
-        [&](Stage const& stage) { return GenerateLines(stage, data); });
+    std::vector<std::vector<Line>> stageLines(currentStage.size());
+    std::ranges::transform(currentStages, stageLines.begin(),
+        [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
 
     // Running the app loop
     while (true) {
@@ -172,17 +182,55 @@ auto LSystems::Engine::Application::Impl::Run(Stages const& stages, Visualizatio
                     switch (event.key.scancode)
                     {
                         case SDL_SCANCODE_LEFT:
-                            if (selectedStageIdx > 0)
+                            if (currentStageIdx > 0)
                             {
-                                --selectedStageIdx;
-                                UpdateStageText(selectedStageIdx+1, stages.size());
+                                --currentStageIdx;
+                                UpdateStageText(currentStageIdx+1, currentStages.size());
                             }
                             break;
                         case SDL_SCANCODE_RIGHT:
-                            if (selectedStageIdx < stages.size() - 1)
+                            if (currentStageIdx < currentStages.size() - 1)
                             {
-                                ++selectedStageIdx;
-                                UpdateStageText(selectedStageIdx+1, stages.size());
+                                ++currentStageIdx;
+                                UpdateStageText(currentStageIdx+1, currentStages.size());
+                            }
+                            break;
+                        case SDL_SCANCODE_UP:
+                            if (currentLsystemIdx < lsystemData.size() - 1)
+                            {
+                                ++currentLsystemIdx;
+
+                                // Resetting the stage idx
+                                currentStageIdx = 0;
+                                UpdateStageText(currentLsystemIdx, currentStages.size());
+
+                                currentStages = lsystemData.at(currentLsystemIdx).stages;
+                                // Generating lines for all stages
+                                stageLines.clear();
+                                stageLines.resize(currentStages.size());
+                                std::ranges::transform(currentStages, stageLines.begin(),
+                                    [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
+
+                                UpdateLSystemText(currentLsystemIdx, lsystemData.size(), lsystemData.at(currentLsystemIdx).name);
+                            }
+                            break;
+                        case SDL_SCANCODE_DOWN:
+                            if (currentLsystemIdx > 0)
+                            {
+                                --currentLsystemIdx;
+
+                                // Resetting the stage idx
+                                currentStageIdx = 0;
+                                UpdateStageText(currentLsystemIdx, currentStages.size());
+
+                                currentStages = lsystemData.at(currentLsystemIdx).stages;
+                                // Generating lines for all stages
+                                stageLines.clear();
+                                stageLines.resize(currentStages.size());
+                                std::ranges::transform(currentStages, stageLines.begin(),
+                                    [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
+
+                                UpdateLSystemText(currentLsystemIdx, lsystemData.size(), lsystemData.at(currentLsystemIdx).name);
                             }
                             break;
                         default:;
@@ -199,7 +247,7 @@ auto LSystems::Engine::Application::Impl::Run(Stages const& stages, Visualizatio
         SDL_RenderClear(m_pSDLRenderer.get());
 
         // Drawing the L-System
-        DrawLines(stageLines.at(selectedStageIdx));
+        DrawLines(stageLines.at(currentStageIdx));
 
         // Text
         DrawText(m_pHorizontalArrowTextTexture, m_horizontalArrowTextDst);

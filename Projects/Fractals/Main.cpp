@@ -58,18 +58,21 @@ int main()
         .stageCount = 4
     }) };
 
+    VisualizationData constexpr visualizationData {
+        .absRadians = 0.5f * std::numbers::pi_v<float>,
+    };
+
+    std::vector<LSystemData> const lSystemData {
+        {kochIslandStages, "Koch island", visualizationData },
+        {snowflakeCurveStages, "Snowflake curve", visualizationData},
+        {kochCurveAStages, "Koch curve A", visualizationData },
+        {kochCurveBStages, "Koch curve B", visualizationData },
+        {kochCurveCStages, "Koch curve C", visualizationData },
+        {kochCurveDStages, "Koch curve D", visualizationData },
+        {kochCurveEStages, "Koch curve E", visualizationData },
+        {kochCurveFStages, "Koch curve F", visualizationData },
+    };
+
     Engine::Application engine{ "D0L visualizer"};
-    engine.Run(
-        // kochIslandStages,
-        // snowflakeCurveStages,
-        // kochCurveAStages,
-        // kochCurveBStages,
-        // kochCurveCStages,
-        // kochCurveDStages,
-        // kochCurveEStages,
-        kochCurveFStages,
-        VisualizationData{
-            .absRadians = 0.5f * std::numbers::pi_v<float>,
-        }
-    );
+    engine.Run(lSystemData);
 }
