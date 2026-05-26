@@ -61,7 +61,7 @@ int main()
         .divideWidthByStage = true,
     };
 
-    Engine::Application const engine{ "2D trees", {720, 720} };
+    Engine::Application const engine{ "2D trees"};
     engine.Run(
         // hexagonStages, hexagonVisualization
         // snailStages,snailVisualization

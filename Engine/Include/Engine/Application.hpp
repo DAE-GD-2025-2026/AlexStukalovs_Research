@@ -31,15 +31,15 @@ namespace LSystems::Engine {
     // The simplest SDL wrapper serving a single-only purpose of visualizing L-systems
     class Application final {
     public:
-        explicit Application(std::string_view name, Vector2f windowDims);
+        explicit Application(std::string_view name);
         ~Application();
         Application(Application const&) noexcept = delete;
         Application(Application&&) noexcept = delete;
-        Application operator=(Application const&) noexcept = delete;
-        Application operator=(Application&&) noexcept = delete;
+        Application& operator=(Application const&) noexcept = delete;
+        Application& operator=(Application&&) noexcept = delete;
 
         // Draws the L-system and quits if Escape is pressed
-        auto Run(Stages const&, VisualizationData const&) const noexcept -> void;
+        auto Run(Stages const&, VisualizationData const&) noexcept -> void;
 
     private:
         class Impl;

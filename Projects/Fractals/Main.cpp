@@ -58,7 +58,7 @@ int main()
         .stageCount = 4
     }) };
 
-    Engine::Application const engine{ "D0L visualizer", {1280, 720} };
+    Engine::Application engine{ "D0L visualizer"};
     engine.Run(
         // kochIslandStages,
         // snowflakeCurveStages,

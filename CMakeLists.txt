@@ -12,6 +12,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 Include(FetchContent)
 
 add_subdirectory("Engine")
+
 # Adding all projects
 set(PROJECT_DIR_NAME "Projects")
 file(GLOB SUBDIRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DIR_NAME}" "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DIR_NAME}/*")

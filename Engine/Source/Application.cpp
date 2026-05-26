@@ -19,8 +19,7 @@ namespace LSystems::Engine
     class Application::Impl final
     {
     public:
-        explicit Impl(std::string_view const name, Vector2f const windowDims)
-            : m_windowDims{ windowDims }
+        explicit Impl(std::string_view const name)
         {
             // Initializing SDL
             Utils::Check(SDL_InitSubSystem(SDL_INIT_VIDEO),
@@ -31,8 +30,6 @@ namespace LSystems::Engine
             Utils::Check(TTF_Init(),
                 "TTF_Init() Error"
             );
-            // Loading the font
-            m_pFont = TTF_OpenFont("Resources/Fonts/Akt/Akt.ttf", 24);
 
             // Creating window and renderer
             SDL_Window* pSDLWindow{};
@@ -40,7 +37,7 @@ namespace LSystems::Engine
             Utils::Check(
                 SDL_CreateWindowAndRenderer(
                     name.data(),
-                    static_cast<int>(windowDims.x), static_cast<int>(windowDims.y),
+                    static_cast<int>(m_windowDims.x), static_cast<int>(m_windowDims.y),
                     SDL_WINDOW_OPENGL,
                     &pSDLWindow, &pSDLRenderer
                     ),
@@ -48,12 +45,44 @@ namespace LSystems::Engine
             );
             m_pSDLWindow = UniqueSDLWindow{ pSDLWindow };
             m_pSDLRenderer = UniqueSDLRenderer{ pSDLRenderer };
-        }
 
-        auto Run(Stages const&, VisualizationData const&) const noexcept -> void;
+            // Loading the font
+            m_pFont_primary = UniqueFont(TTF_OpenFont("Resources/Fonts/Akt/Akt.ttf", 24));
+            assert(m_pFont_primary);
+            m_pFont_secondary = UniqueFont(TTF_OpenFont("Resources/Fonts/Akt/Akt.ttf", 16));
+            assert(m_pFont_secondary);
+            // Creating text textures
+            //// Horizontal arrow text
+            m_pHorizontalArrowTextTexture = CreateTextTexture( "Press horizontal arrows to switch stages", m_pFont_secondary, m_textColor_secondary);
+            assert(m_pHorizontalArrowTextTexture);
+            m_horizontalArrowTextDst = { 10.f, m_windowDims.y - 30.f, static_cast<float>(m_pHorizontalArrowTextTexture->w), static_cast<float>(m_pHorizontalArrowTextTexture->h) };
+            //// Vertical arrow text
+            m_pVerticalArrowTextTexture = CreateTextTexture( "Press vertical arrows to switch L-systems", m_pFont_secondary, m_textColor_secondary);
+            assert(m_pVerticalArrowTextTexture);
+            m_verticalArrowTextDst = {10.f, 45.f, static_cast<float>(m_pVerticalArrowTextTexture->w), static_cast<float>(m_pVerticalArrowTextTexture->h)};
+            //// Name text
+            m_pNameTextTexture = CreateTextTexture( "L-system 1/5: Koch's snowflake", m_pFont_primary, m_textColor_primary);
+            assert(m_pNameTextTexture);
+            m_nameTextDst = { 10.f, 10.f, static_cast<float>(m_pNameTextTexture->w), static_cast<float>(m_pNameTextTexture->h) };
+        }
+        ~Impl() noexcept
+        {
+            // Must take place before TTF_Quit()
+            m_pFont_primary.reset();
+            m_pFont_secondary.reset();
+
+            TTF_Quit();
+            SDL_Quit();
+        }
+        Impl(Impl const&) noexcept = delete;
+        Impl(Impl &&) noexcept = delete;
+        Impl& operator=(Impl const&) noexcept = delete;
+        Impl& operator=(Impl &&) noexcept = delete;
+
+        auto Run(Stages const&, VisualizationData const&) noexcept -> void;
 
     private:
-        Vector2f m_windowDims;
+        Vector2f const m_windowDims{ 1280.f, 720.f };
 
 #pragma region SDL_Structs
         using UniqueSDLWindow = std::unique_ptr<SDL_Window,
@@ -68,11 +97,31 @@ namespace LSystems::Engine
 #pragma endregion SDL_Structs
 
 #pragma region Text
-        // Text
-        TTF_Font* m_pFont{};
-        SDL_Color g_primaryTextColor{ 255, 255, 255, 255 };
-        SDL_Color g_secondaryTextColor{ 155, 155, 155, 255 };
-        SDL_Texture* g_pPressArrowsTexture{}, * g_pStageTexture{}, * g_pPressNumberTexture{}, *g_pNameTexture{};
+        using UniqueFont = std::unique_ptr<TTF_Font, decltype([](TTF_Font* pFont){ TTF_CloseFont(pFont); })>;
+        UniqueFont m_pFont_primary{}, m_pFont_secondary{};
+        SDL_Color m_textColor_primary{ 255, 255, 255, 255 },
+            m_textColor_secondary{ 155, 155, 155, 255 };
+        using UniqueTexture = std::unique_ptr<SDL_Texture, decltype([](SDL_Texture* pTexture){ SDL_DestroyTexture(pTexture); })>;
+        UniqueTexture m_pHorizontalArrowTextTexture{}, m_pStageTextTexture{}, m_pVerticalArrowTextTexture{}, m_pNameTextTexture{};
+        SDL_FRect m_horizontalArrowTextDst{}, m_stageTextDst{}, m_verticalArrowTextDst{}, m_nameTextDst{};
+
+        [[nodiscard]] UniqueTexture CreateTextTexture(std::string_view const text, UniqueFont const& pFont, SDL_Color const& color) const
+        {
+            SDL_Surface* pSurface{ TTF_RenderText_Blended(pFont.get(), text.data(), 0, color) };
+            assert(pSurface);
+            auto pTexture{ UniqueTexture(SDL_CreateTextureFromSurface(m_pSDLRenderer.get(), pSurface)) };
+            SDL_DestroySurface(pSurface);
+            return pTexture;
+        }
+        void DrawText(UniqueTexture const& pTextTexture, SDL_FRect const& dst) const
+        {
+            SDL_RenderTexture(m_pSDLRenderer.get(), pTextTexture.get(), nullptr, &dst);
+        }
+        void UpdateStageText(uint32_t const stageIdx, uint32_t const stageCount)
+        {
+            m_pStageTextTexture = CreateTextTexture( std::format("Stage {}/{}", stageIdx, stageCount), m_pFont_primary, m_textColor_primary);
+            assert(m_pStageTextTexture);
+        }
 #pragma endregion Text
 
 #pragma region Drawing
@@ -87,21 +136,24 @@ namespace LSystems::Engine
         // Centers and scales lines so the whole L-system fills the window
         auto FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void;
     };
+
 }
 
-LSystems::Engine::Application::Application(std::string_view const name, Vector2f const windowDims)
-    : m_pImpl{ std::make_unique<Impl>(name, windowDims) } {}
+LSystems::Engine::Application::Application(std::string_view const name)
+    : m_pImpl{ std::make_unique<Impl>(name) } {}
 
 LSystems::Engine::Application::~Application() = default;// External for pimpl to work
 
-auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void
+auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) noexcept -> void
 {
     m_pImpl->Run(stages, data);
 }
 
-auto LSystems::Engine::Application::Impl::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void{
+auto LSystems::Engine::Application::Impl::Run(Stages const& stages, VisualizationData const& data) noexcept -> void{
+    // Stages
     uint32_t selectedStageIdx{};// Stage that user observes
-
+    UpdateStageText(selectedStageIdx+1, stages.size());
+    m_stageTextDst = { 10.f, m_windowDims.y - 60.f, static_cast<float>(m_pStageTextTexture->w), static_cast<float>(m_pStageTextTexture->h) };
     // Generating lines for all stages
     std::vector<std::vector<Line>> stageLines(stages.size());
     std::ranges::transform(stages, stageLines.begin(),
@@ -120,10 +172,18 @@ auto LSystems::Engine::Application::Impl::Run(Stages const& stages, Visualizatio
                     switch (event.key.scancode)
                     {
                         case SDL_SCANCODE_LEFT:
-                            if (selectedStageIdx > 0) --selectedStageIdx;
+                            if (selectedStageIdx > 0)
+                            {
+                                --selectedStageIdx;
+                                UpdateStageText(selectedStageIdx+1, stages.size());
+                            }
                             break;
                         case SDL_SCANCODE_RIGHT:
-                            if (selectedStageIdx < stages.size() - 1) ++selectedStageIdx;
+                            if (selectedStageIdx < stages.size() - 1)
+                            {
+                                ++selectedStageIdx;
+                                UpdateStageText(selectedStageIdx+1, stages.size());
+                            }
                             break;
                         default:;
                     }
@@ -142,8 +202,10 @@ auto LSystems::Engine::Application::Impl::Run(Stages const& stages, Visualizatio
         DrawLines(stageLines.at(selectedStageIdx));
 
         // Text
-
-
+        DrawText(m_pHorizontalArrowTextTexture, m_horizontalArrowTextDst);
+        DrawText(m_pStageTextTexture, m_stageTextDst);
+        DrawText(m_pVerticalArrowTextTexture, m_verticalArrowTextDst);
+        DrawText(m_pNameTextTexture, m_nameTextDst);
 
         // Showing the new frame
         SDL_RenderPresent(m_pSDLRenderer.get());
@@ -305,7 +367,7 @@ auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
 auto LSystems::Engine::Application::Impl::FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void
 {
     if (lines.empty()) return;
-    float constexpr padding{ 20.f };// px of margin on each side
+    float constexpr padding{ 60.f };// px of margin on each side
 
     auto const [x, y, w, h]{ GetAABB(lines) };
 
