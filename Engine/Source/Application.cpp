@@ -60,10 +60,6 @@ namespace LSystems::Engine
             m_pVerticalArrowTextTexture = CreateTextTexture( "Press vertical arrows to switch L-systems", m_pFont_secondary, m_textColor_secondary);
             assert(m_pVerticalArrowTextTexture);
             m_verticalArrowTextDst = {10.f, 45.f, static_cast<float>(m_pVerticalArrowTextTexture->w), static_cast<float>(m_pVerticalArrowTextTexture->h)};
-            //// Name text
-            m_pNameTextTexture = CreateTextTexture( "L-system 1/5: Koch's snowflake", m_pFont_primary, m_textColor_primary);
-            assert(m_pNameTextTexture);
-            m_nameTextDst = { 10.f, 10.f, static_cast<float>(m_pNameTextTexture->w), static_cast<float>(m_pNameTextTexture->h) };
         }
         ~Impl() noexcept
         {
@@ -126,6 +122,7 @@ namespace LSystems::Engine
         {
             m_pNameTextTexture = CreateTextTexture( std::format("L-system {}/{}: {}", lSystemIdx+1, lSystemCount, lSystemName), m_pFont_primary, m_textColor_primary);
             assert(m_pNameTextTexture);
+            m_nameTextDst = { 10.f, 10.f, static_cast<float>(m_pNameTextTexture->w), static_cast<float>(m_pNameTextTexture->h) };
         }
 #pragma endregion Text
 
@@ -165,7 +162,7 @@ auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& ls
     UpdateStageText(currentStageIdx+1, currentStage.size());
     m_stageTextDst = { 10.f, m_windowDims.y - 60.f, static_cast<float>(m_pStageTextTexture->w), static_cast<float>(m_pStageTextTexture->h) };
     // Generating lines for all stages
-    std::vector<std::vector<Line>> stageLines(currentStage.size());
+    std::vector<std::vector<Line>> stageLines(currentStages.size());
     std::ranges::transform(currentStages, stageLines.begin(),
         [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
 
@@ -202,7 +199,7 @@ auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& ls
 
                                 // Resetting the stage idx
                                 currentStageIdx = 0;
-                                UpdateStageText(currentLsystemIdx, currentStages.size());
+                                UpdateStageText(currentStageIdx+1, currentStages.size());
 
                                 currentStages = lsystemData.at(currentLsystemIdx).stages;
                                 // Generating lines for all stages
@@ -221,7 +218,7 @@ auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& ls
 
                                 // Resetting the stage idx
                                 currentStageIdx = 0;
-                                UpdateStageText(currentLsystemIdx, currentStages.size());
+                                UpdateStageText(currentStageIdx+1, currentStages.size());
 
                                 currentStages = lsystemData.at(currentLsystemIdx).stages;
                                 // Generating lines for all stages

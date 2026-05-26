@@ -14,8 +14,8 @@ int main()
         .stageCount = 5,
     }) };
     VisualizationData constexpr aVisualiztion{
-        .absRadiansFrom= Engine::Utils::ToRadians(25.7f),
-        .absRadians = Engine::Utils::ToRadians(90.f)
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(25.7f),
     };
 
     Stages const bStages{ GenerateStages(LSystem{
@@ -24,8 +24,8 @@ int main()
         .stageCount = 5
     })};
     VisualizationData constexpr bVisualiztion{
-        .absRadiansFrom= Engine::Utils::ToRadians(20.f),
-        .absRadians = Engine::Utils::ToRadians(90.f)
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(20.f),
     };
 
     Stages const cStages{ GenerateStages(LSystem{
@@ -34,8 +34,8 @@ int main()
         .stageCount = 4
     })};
     VisualizationData constexpr cVisualiztion{
-        .absRadiansFrom= Engine::Utils::ToRadians(22.5f),
-        .absRadians = Engine::Utils::ToRadians(90.f)
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(22.5f),
     };
 
     Stages const dStages{ GenerateStages(LSystem{
@@ -47,8 +47,8 @@ int main()
         .stageCount = 7
     })};
     VisualizationData constexpr dVisualiztion{
-        .absRadiansFrom= Engine::Utils::ToRadians(20.f),
-        .absRadians = Engine::Utils::ToRadians(90.f)
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(20.f),
     };
 
     Stages const eStages{ GenerateStages(LSystem{
@@ -60,8 +60,8 @@ int main()
         .stageCount = 7
     })};
     VisualizationData constexpr eVisualiztion{
-        .absRadiansFrom= Engine::Utils::ToRadians(25.7f),
-        .absRadians = Engine::Utils::ToRadians(90.f)
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(25.7f),
     };
 
     Stages const fStages{ GenerateStages(LSystem{
@@ -73,21 +73,20 @@ int main()
         .stageCount = 5
     })};
     VisualizationData constexpr fVisualiztion{
-        .absRadiansFrom= Engine::Utils::ToRadians(22.5f),
-        .absRadians = Engine::Utils::ToRadians(90.f)
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(22.5f),
     };
 
-    Engine::Application const engine{ "Branching structures", {720, 720} };
-    engine.Run(
-        // aStages, aVisualiztion
-        // bStages, bVisualiztion
-        // cStages, cVisualiztion
-        // dStages, dVisualiztion
-        eStages, eVisualiztion
-        // fStages, fVisualiztion
-    );
-    // TODO:
-    // 1. Define L-Systems in a file
-    // 2. Add ability to switch between L-Systems at runtime
-    // 3. Add text explaining the controls
+    std::vector<LSystemData> const lSystemData {
+        {aStages, "A", aVisualiztion},
+        {bStages, "B", bVisualiztion},
+        {cStages, "C", cVisualiztion},
+        {dStages, "D", dVisualiztion},
+        {eStages, "E", eVisualiztion},
+        {fStages, "F", fVisualiztion},
+    };
+
+    Engine::Application engine{ "Branching structures" };
+    engine.Run(lSystemData);
+    // TODO: Define L-Systems in a file
 }
