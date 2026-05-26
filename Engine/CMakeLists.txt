@@ -40,12 +40,23 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3_ttf::SDL3_ttf
 )
 
-# Copying SDL dll files to the engine's directory
+# Copying SDL dll files to the engine's build directory
 add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "$<TARGET_FILE:SDL3::SDL3>"
     ${CMAKE_CURRENT_BINARY_DIR}
+    VERBATIM
+)
+
+# Copying Resources/ to the engine's build directory
+set(RESOURCE_DIR_NAME "Resources")
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCE_DIR_NAME}"
+    "${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_DIR_NAME}"
     VERBATIM
 )

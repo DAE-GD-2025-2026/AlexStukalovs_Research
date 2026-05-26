@@ -4,6 +4,7 @@
 #include "LSystem.hpp"
 #include "Engine/GeometricPrimitives.hpp"
 // Standard
+#include <memory>
 #include <string_view>
 
 namespace LSystems
@@ -27,32 +28,23 @@ namespace LSystems
 
 namespace LSystems::Engine {
 
-#pragma region Application
     // The simplest SDL wrapper serving a single-only purpose of visualizing L-systems
     class Application final {
     public:
         explicit Application(std::string_view name, Vector2f windowDims);
+        ~Application();
+        Application(Application const&) noexcept = delete;
+        Application(Application&&) noexcept = delete;
+        Application operator=(Application const&) noexcept = delete;
+        Application operator=(Application&&) noexcept = delete;
 
         // Draws the L-system and quits if Escape is pressed
         auto Run(Stages const&, VisualizationData const&) const noexcept -> void;
 
     private:
-        Vector2f m_windowDims;
-
-        auto DrawLines(std::vector<Line> const&) const -> void;
-
-        auto DrawLine(Line const&) const noexcept -> void;
-        auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
-
-        // Creates lines out of L-System stage
-        [[nodiscard]] auto GenerateLines(Stage const&, VisualizationData const&) const -> std::vector<Line>;
-
-        // Centers and scales lines so the whole L-system fills the window
-        auto FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void;
+        class Impl;
+        std::unique_ptr<Impl> m_pImpl;
     };
-
-
-#pragma endregion Application
 
 }
 

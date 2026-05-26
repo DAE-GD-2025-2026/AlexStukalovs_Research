@@ -3,40 +3,103 @@
 #include "Utils.hpp"
 // Third-party
 #include "SDL3/SDL.h"
+#include "SDL3/SDL_video.h"
+#include "SDL3_ttf/SDL_ttf.h"
 // Standard
+#include <memory>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
-#include <print>
 #include <ranges>
 #include <stack>
 
-static SDL_Window* g_pSDLWindow{};
-static SDL_Renderer* g_pSDLRenderer{};
-
-#pragma region Application
-LSystems::Engine::Application::Application(std::string_view const name, Vector2f const windowDims)
-    : m_windowDims{ windowDims }
+namespace LSystems::Engine
 {
-    // Initializing SDL
-    Utils::Check(SDL_InitSubSystem(SDL_INIT_VIDEO),
-        "SDL_Init(SDL_INIT_VIDEO) Error"
-    );
+    class Application::Impl final
+    {
+    public:
+        explicit Impl(std::string_view const name, Vector2f const windowDims)
+            : m_windowDims{ windowDims }
+        {
+            // Initializing SDL
+            Utils::Check(SDL_InitSubSystem(SDL_INIT_VIDEO),
+                "SDL_Init(SDL_INIT_VIDEO) Error"
+            );
 
-    // Creating window and renderer
-    Utils::Check(
-        SDL_CreateWindowAndRenderer(
-            name.data(),
-            static_cast<int>(windowDims.x), static_cast<int>(windowDims.y),
-            SDL_WINDOW_OPENGL,
-            &g_pSDLWindow, &g_pSDLRenderer
-            ),
-        "Failed to initialize SDL window and renderer"
-    );
+            // Initializing SDL_ttf
+            Utils::Check(TTF_Init(),
+                "TTF_Init() Error"
+            );
+            // Loading the font
+            m_pFont = TTF_OpenFont("Resources/Fonts/Akt/Akt.ttf", 24);
+
+            // Creating window and renderer
+            SDL_Window* pSDLWindow{};
+            SDL_Renderer* pSDLRenderer{};
+            Utils::Check(
+                SDL_CreateWindowAndRenderer(
+                    name.data(),
+                    static_cast<int>(windowDims.x), static_cast<int>(windowDims.y),
+                    SDL_WINDOW_OPENGL,
+                    &pSDLWindow, &pSDLRenderer
+                    ),
+                "Failed to initialize SDL window and renderer"
+            );
+            m_pSDLWindow = UniqueSDLWindow{ pSDLWindow };
+            m_pSDLRenderer = UniqueSDLRenderer{ pSDLRenderer };
+        }
+
+        auto Run(Stages const&, VisualizationData const&) const noexcept -> void;
+
+    private:
+        Vector2f m_windowDims;
+
+#pragma region SDL_Structs
+        using UniqueSDLWindow = std::unique_ptr<SDL_Window,
+            decltype([](SDL_Window* pSDLWindow){ SDL_DestroyWindow(pSDLWindow); })
+        >;
+        UniqueSDLWindow m_pSDLWindow{};
+
+        using UniqueSDLRenderer = std::unique_ptr<SDL_Renderer,
+            decltype([](SDL_Renderer* pSDLRenderer){ if (pSDLRenderer) SDL_DestroyRenderer(pSDLRenderer); })
+        >;
+        UniqueSDLRenderer m_pSDLRenderer{};
+#pragma endregion SDL_Structs
+
+#pragma region Text
+        // Text
+        TTF_Font* m_pFont{};
+        SDL_Color g_primaryTextColor{ 255, 255, 255, 255 };
+        SDL_Color g_secondaryTextColor{ 155, 155, 155, 255 };
+        SDL_Texture* g_pPressArrowsTexture{}, * g_pStageTexture{}, * g_pPressNumberTexture{}, *g_pNameTexture{};
+#pragma endregion Text
+
+#pragma region Drawing
+        auto DrawLines(std::vector<Line> const&) const -> void;
+        auto DrawLine(Line const&) const noexcept -> void;
+        auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
+#pragma endregion Drawing
+
+        // Creates lines out of L-System stage
+        [[nodiscard]] auto GenerateLines(Stage const&, VisualizationData const&) const -> std::vector<Line>;
+
+        // Centers and scales lines so the whole L-system fills the window
+        auto FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void;
+    };
 }
 
-auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void{
+LSystems::Engine::Application::Application(std::string_view const name, Vector2f const windowDims)
+    : m_pImpl{ std::make_unique<Impl>(name, windowDims) } {}
+
+LSystems::Engine::Application::~Application() = default;// External for pimpl to work
+
+auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void
+{
+    m_pImpl->Run(stages, data);
+}
+
+auto LSystems::Engine::Application::Impl::Run(Stages const& stages, VisualizationData const& data) const noexcept -> void{
     uint32_t selectedStageIdx{};// Stage that user observes
 
     // Generating lines for all stages
@@ -71,21 +134,25 @@ auto LSystems::Engine::Application::Run(Stages const& stages, VisualizationData 
 
         // Rendering
 
-       // Clearing the background with black
-        SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderClear(g_pSDLRenderer);
+        // Clearing the background with black
+        SDL_SetRenderDrawColor(m_pSDLRenderer.get(), 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(m_pSDLRenderer.get());
 
         // Drawing the L-System
         DrawLines(stageLines.at(selectedStageIdx));
 
+        // Text
+
+
+
         // Showing the new frame
-        SDL_RenderPresent(g_pSDLRenderer);
+        SDL_RenderPresent(m_pSDLRenderer.get());
     }
 }
 
-auto LSystems::Engine::Application::DrawLines(std::vector<Line> const& lines) const -> void
+auto LSystems::Engine::Application::Impl::DrawLines(std::vector<Line> const& lines) const -> void
 {
-    SDL_SetRenderDrawColor(g_pSDLRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
+    SDL_SetRenderDrawColor(m_pSDLRenderer.get(), 255, 255, 255, SDL_ALPHA_OPAQUE);// Setting white color
     for (Line const& line : lines) DrawLine(line);
 }
 
@@ -98,7 +165,7 @@ struct State final
     uint32_t stateIdx{};
 };
 
-auto LSystems::Engine::Application::GenerateLines(Stage const& stage, VisualizationData const& data) const -> std::vector<Line>
+auto LSystems::Engine::Application::Impl::GenerateLines(Stage const& stage, VisualizationData const& data) const -> std::vector<Line>
 {
     // Allocating point history
     std::vector<Line> lines;
@@ -170,7 +237,7 @@ auto LSystems::Engine::Application::GenerateLines(Stage const& stage, Visualizat
     return lines;
 }
 
-auto LSystems::Engine::Application::DrawLine(Line const& line) const noexcept -> void
+auto LSystems::Engine::Application::Impl::DrawLine(Line const& line) const noexcept -> void
 {
     Vector2f const d{ line.p2.x - line.p1.x, line.p2.y - line.p1.y };
     float const length{ std::hypot(d.x, d.y) };
@@ -187,10 +254,10 @@ auto LSystems::Engine::Application::DrawLine(Line const& line) const noexcept ->
         { { line.p2.x - n.x, m_windowDims.y - (line.p2.y - n.y) }, {255,255,255,255}, {0,0} }
     };
     std::array constexpr indices{ 0, 1, 2, 1, 2, 3 };
-    SDL_RenderGeometry(g_pSDLRenderer, nullptr, vertices.data(), 4, indices.data(), 6);
+    SDL_RenderGeometry(m_pSDLRenderer.get(), nullptr, vertices.data(), 4, indices.data(), 6);
 }
 
-auto LSystems::Engine::Application::DrawCircle(Vector2f const center, float const radius) const noexcept -> void
+auto LSystems::Engine::Application::Impl::DrawCircle(Vector2f const center, float const radius) const noexcept -> void
 {
     // Thanks, SDL, for not having a default circle-drawing function
 
@@ -235,7 +302,7 @@ auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
     return SDL_FRect{ minX, minY, maxX - minX, maxY - minY };
 }
 
-auto LSystems::Engine::Application::FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void
+auto LSystems::Engine::Application::Impl::FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void
 {
     if (lines.empty()) return;
     float constexpr padding{ 20.f };// px of margin on each side
@@ -261,5 +328,3 @@ auto LSystems::Engine::Application::FitLinesToScreen(std::vector<Line>& lines) c
         return Line{ fit(line.p1), fit(line.p2), line.widthPx};
     });
 }
-
-#pragma endregion Application
