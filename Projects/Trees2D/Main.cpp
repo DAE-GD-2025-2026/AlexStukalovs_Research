@@ -15,9 +15,12 @@ int main()
         .rules = {{ 'L', "F[-L]+L" }},
         .stageCount = 15,
     }) };
+    VisualizationData constexpr pseudoTreeVisualization{
+        .startRadians = Engine::Utils::ToRadians(90.f),
+        .absRadians = Engine::Utils::ToRadians(30.f),// hexagon
+    };
     VisualizationData constexpr hexagonVisualization{
         .startRadians = Engine::Utils::ToRadians(90.f),
-        // .absRadians = Engine::Utils::ToRadians(30.f),// simple tree
         .absRadians = Engine::Utils::ToRadians(60.f),// hexagon
     };
 
@@ -46,7 +49,7 @@ int main()
     Stages const tree2DStages{ GenerateStages(LSystem{
         .axiom = "FL",
         .rules = {{'L', "[-FL][+FL]"}},
-        .stageCount = 15,
+        .stageCount = 8,
     }) };
     VisualizationData constexpr tree2DVisualization{
         .startRadians = Engine::Utils::ToRadians(90.f),
@@ -61,13 +64,16 @@ int main()
         .divideWidthByStage = true,
     };
 
-    Engine::Application const engine{ "2D trees"};
-    engine.Run(
-        // hexagonStages, hexagonVisualization
-        // snailStages,snailVisualization
-        hTreeStages, hTreeVisualization
-        // tree2DStages, tree2DVisualization
-    );
+    std::vector<LSystemData> const lSystemData {
+        {hexagonStages, "Pseudo-tree", pseudoTreeVisualization},
+        {hexagonStages, "Hexagon", hexagonVisualization},
+        {snailStages, "Snail", snailVisualization},
+        {hTreeStages, "H tree", hTreeVisualization},
+        {tree2DStages, "Tree 2D", tree2DVisualization},
+    };
+
+    Engine::Application engine{"2D trees"};
+    engine.Run(lSystemData);
 
     // Further reading
     // https://gpfault.net/posts/generating-trees.txt.html
