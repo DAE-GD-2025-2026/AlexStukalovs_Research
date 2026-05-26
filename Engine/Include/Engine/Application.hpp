@@ -18,6 +18,7 @@ namespace LSystems
         float startLengthPx{ 1.f };
         bool divideLengthByStage{};
         float absLengthAddend{};
+        float lengthDividend{ 1.f };
 
         float widthPx{ 1.f };
         bool divideWidthByStage{};

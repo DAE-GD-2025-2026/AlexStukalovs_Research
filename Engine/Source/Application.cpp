@@ -132,6 +132,7 @@ auto LSystems::Engine::Application::GenerateLines(Stage const& stage, Visualizat
             // Updating the state
             currentState.point = newPointPx;
             ++currentState.stateIdx;
+            currentState.lengthPx /= data.lengthDividend;
 
             break;
         }
