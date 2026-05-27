@@ -1,5 +1,10 @@
+# About
+This project is research that serves a single purpose of enabling the author to generate 2D trees using L-systems, which is a problem that has already been solved and has qualitative implementations. This work is targeted at personal development rather than at contributing to the field. It mostly features literature analysis, explaining the concept of L-systems from the ground up and providing open-source C++ projects that demonstrate the application of the theory covered.
+This research is one of the exam assignments done by Aleksandrs Stukalovs for the Algorithms 2 course at Howest Digital Arts and Entertainment in the year 2026.
+The project and the research are available on the following repository: https://github.com/DAE-GD-2025-2026/AlexStukalovs_Research
+
 # Definition 
-**L-Systems**(a.k.a., Lindenmayer System) are a mathematical theory of plant development named in honor of biologist Aristid Lindenmayer. L-System is a rewriting system, meaning it defines complex objects by successively replacing parts of a simple initial object using a set of rewriting rules. Note that L-Systems are parallel, as in they apply rules to all the elementary parts of an object simultaneously and not sequentially. *(Prusinkiewicz & Lindenmayer, 1990, p. 1 - 2)*
+**L-Systems**(a.k.a., Lindenmayer Systems) are a mathematical theory of plant development named in honor of biologist Aristid Lindenmayer. L-System is a rewriting system, meaning it defines complex objects by successively replacing parts of a simple initial object using a set of rewriting rules. Note that L-Systems are parallel, as in they apply rules to all the elementary parts of an object simultaneously and not sequentially. *(Prusinkiewicz & Lindenmayer, 1990, p. 1 - 2)*
 # Algorithm
 The simplest L-system type is **D0L** - **D**eterministic **0**(zero)-context **L**-system. *(Ochoa, 1998)*\
 **Deterministic** - each symbol(character) in the system has exactly one rewriting rule *(Daintith & Wright, 2008)*\
@@ -34,7 +39,7 @@ Then the rewriting process will look as follows:
 ```
 **Figure 1.1.** Example derivation of a D0L-system. *(Ochoa, 1998)*.
 
-https://github.com/user-attachments/assets/e11703fa-5c26-4f3d-b4de-7045dda9c3b7
+<video src="https://github.com/user-attachments/assets/e11703fa-5c26-4f3d-b4de-7045dda9c3b7" controls></video>
 
 **Figure 1.2.** User-defined D0L system derivation.
 
