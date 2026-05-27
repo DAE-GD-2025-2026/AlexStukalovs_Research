@@ -13,11 +13,11 @@ int main()
     Stages const hexagonStages{ GenerateStages(LSystem{
         .axiom = "L",
         .rules = {{ 'L', "F[-L]+L" }},
-        .stageCount = 15,
+        .stageCount = 10,
     }) };
     VisualizationData constexpr pseudoTreeVisualization{
         .startRadians = Engine::Utils::ToRadians(90.f),
-        .absRadians = Engine::Utils::ToRadians(30.f),// hexagon
+        .absRadians = Engine::Utils::ToRadians(30.f),// tree
     };
     VisualizationData constexpr hexagonVisualization{
         .startRadians = Engine::Utils::ToRadians(90.f),
@@ -38,7 +38,7 @@ int main()
     Stages const hTreeStages{ GenerateStages(LSystem{
         .axiom = "L",
         .rules = {{ 'L', "[-FL][+FL]" }},
-        .stageCount = 15,
+        .stageCount = 10,
     }) };
     VisualizationData const hTreeVisualization{
         .startRadians = Engine::Utils::ToRadians(90.f),
@@ -72,7 +72,7 @@ int main()
         {tree2DStages, "Tree 2D", tree2DVisualization},
     };
 
-    Engine::Application engine{"2D trees"};
+    Engine::Application engine{"Tree 2D"};
     engine.Run(lSystemData);
 
     // Further reading

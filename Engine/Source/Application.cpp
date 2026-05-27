@@ -412,7 +412,7 @@ auto GetAABB(std::vector<LSystems::Line> const& lines) -> SDL_FRect
 auto LSystems::Engine::Application::Impl::FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void
 {
     if (lines.empty()) return;
-    float constexpr padding{ 60.f };// px of margin on each side
+    float constexpr padding{ 100.f };// px of margin on each side
 
     auto const [x, y, w, h]{ GetAABB(lines) };
 

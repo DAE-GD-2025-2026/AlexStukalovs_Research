@@ -10,7 +10,7 @@ int main()
 
     Stages const aStages{ GenerateStages(LSystem{
         .axiom = "F",
-        .rules = {{ 'F', "F[+F]F[-F]F" }},
+        .rules = {{ 'F', "F[+F]F[-F][F]" }},
         .stageCount = 5,
     }) };
     VisualizationData constexpr aVisualiztion{

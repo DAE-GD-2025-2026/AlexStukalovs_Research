@@ -73,6 +73,6 @@ int main()
         {kochCurveFStages, "Koch curve F", visualizationData },
     };
 
-    Engine::Application engine{ "D0L visualizer"};
+    Engine::Application engine{ "Fractal visualizer"};
     engine.Run(lSystemData);
 }
