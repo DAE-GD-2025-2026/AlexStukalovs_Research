@@ -148,7 +148,7 @@ The goal of the research was successfully achieved; the author indeed generated 
 
 ## Limitations and further research possibilities
 When it comes to the author's implementation in particular, first and foremost, it would be desired to give users maximal control over the definition of generated L-systems, as well as the ability to save the presets created. Furthermore, modification of the parameters at runtime with instant visual feedback would create significantly more room for experimentation with the tool.\
-Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
+Furthermore, there will be an inevitable need to invest into parsing. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
 Another substantial leap that would potentially allow for more real-world applications for the tool would be to make it work in 3D and provide trees with crowns, consisting of leaves, buds, flowers, etc.
 
 # Source list

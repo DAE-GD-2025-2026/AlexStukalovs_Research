@@ -24,3 +24,13 @@ add_custom_command(
     "${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_DIR_NAME}"
     VERBATIM
 )
+foreach (DLL_TARGET IN LISTS SDL_LIBS)
+    add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:${DLL_TARGET}>"
+            ${CMAKE_CURRENT_BINARY_DIR}
+            VERBATIM
+    )
+endforeach ()

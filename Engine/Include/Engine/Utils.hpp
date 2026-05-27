@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <random>
+#include <numbers>
 
 namespace LSystems::Engine::Utils
 {
