@@ -132,11 +132,22 @@ namespace LSystems::Engine
         auto DrawCircle(Vector2f center, float radius) const noexcept -> void;
 #pragma endregion Drawing
 
+#pragma region Lines
         // Creates lines out of L-System stage
         [[nodiscard]] auto GenerateLines(Stage const&, VisualizationData const&) const -> std::vector<Line>;
 
         // Centers and scales lines so the whole L-system fills the window
         auto FitLinesToScreen(std::vector<Line>& lines) const noexcept -> void;
+
+        [[nodiscard]] auto GenerateLinesForAllStages(Stages const& stages, VisualizationData const& visualizationData) const -> std::vector<std::vector<Line>>
+        {
+            std::vector<std::vector<Line>> stageLines(stages.size());
+            std::ranges::transform(stages, stageLines.begin(),
+                [&](Stage const& stage) { return GenerateLines(stage, visualizationData); });
+            return stageLines;
+        }
+
+#pragma endregion Lines
     };
 
 }
@@ -146,10 +157,11 @@ LSystems::Engine::Application::Application(std::string_view const name)
 
 LSystems::Engine::Application::~Application() = default;// External for pimpl to work
 
-auto LSystems::Engine::Application::Run(std::vector<LSystemData> const& lsystemData) noexcept -> void
+auto LSystems::Engine::Application::Run(std::vector<LSystemData> const& lsystemData) const noexcept -> void
 {
     m_pImpl->Run(lsystemData);
 }
+
 
 auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& lsystemData) noexcept -> void{
     // L-systems
@@ -161,10 +173,7 @@ auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& ls
     Stage const& currentStage{ lsystemData.at(currentStageIdx).stages.at(currentStageIdx) };
     UpdateStageText(currentStageIdx+1, currentStage.size());
     m_stageTextDst = { 10.f, m_windowDims.y - 60.f, static_cast<float>(m_pStageTextTexture->w), static_cast<float>(m_pStageTextTexture->h) };
-    // Generating lines for all stages
-    std::vector<std::vector<Line>> stageLines(currentStages.size());
-    std::ranges::transform(currentStages, stageLines.begin(),
-        [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
+    auto stageLines{ GenerateLinesForAllStages(currentStages, lsystemData.at(currentLsystemIdx).visualizationData) };
 
     // Running the app loop
     while (true) {
@@ -202,12 +211,7 @@ auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& ls
                                 UpdateStageText(currentStageIdx+1, currentStages.size());
 
                                 currentStages = lsystemData.at(currentLsystemIdx).stages;
-                                // Generating lines for all stages
-                                stageLines.clear();
-                                stageLines.resize(currentStages.size());
-                                std::ranges::transform(currentStages, stageLines.begin(),
-                                    [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
-
+                                stageLines = GenerateLinesForAllStages(currentStages, lsystemData.at(currentLsystemIdx).visualizationData);
                                 UpdateLSystemText(currentLsystemIdx, lsystemData.size(), lsystemData.at(currentLsystemIdx).name);
                             }
                             break;
@@ -221,12 +225,8 @@ auto LSystems::Engine::Application::Impl::Run(std::vector<LSystemData> const& ls
                                 UpdateStageText(currentStageIdx+1, currentStages.size());
 
                                 currentStages = lsystemData.at(currentLsystemIdx).stages;
-                                // Generating lines for all stages
-                                stageLines.clear();
-                                stageLines.resize(currentStages.size());
-                                std::ranges::transform(currentStages, stageLines.begin(),
-                                    [&](Stage const& stage) { return GenerateLines(stage, lsystemData.at(currentLsystemIdx).visualizationData); });
-
+                                stageLines = GenerateLinesForAllStages(currentStages, lsystemData.at(currentLsystemIdx).visualizationData);
+                                stageLines = GenerateLinesForAllStages(currentStages, lsystemData.at(currentLsystemIdx).visualizationData);
                                 UpdateLSystemText(currentLsystemIdx, lsystemData.size(), lsystemData.at(currentLsystemIdx).name);
                             }
                             break;

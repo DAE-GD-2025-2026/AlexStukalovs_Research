@@ -24,9 +24,8 @@ namespace LSystems
         float widthPx{ 1.f };
         bool divideWidthByStage{};
     };
-    struct LSystemData
+    struct LSystemData final
     {
-        // std::pair<Stages, std::string>>;
         Stages const& stages;
         std::string name;
         VisualizationData const& visualizationData;
@@ -46,7 +45,7 @@ namespace LSystems::Engine {
         Application& operator=(Application&&) noexcept = delete;
 
         // Draws the L-system and quits if Escape is pressed
-        auto Run(std::vector<LSystemData> const&) noexcept -> void;
+        auto Run(std::vector<LSystemData> const&) const noexcept -> void;
 
     private:
         class Impl;

@@ -9,7 +9,6 @@
 int main()
 {
     using namespace LSystems;
-
     Stages const kochIslandStages{ GenerateStages(LSystem{
         .axiom = "F-F-F-F",
         .rules = Rules{Rule{ 'F', "F-F+F+FF-F-F+F" }},
@@ -75,4 +74,5 @@ int main()
 
     Engine::Application engine{ "Fractal visualizer"};
     engine.Run(lSystemData);
+    // engine.Run({{kochIslandStages, "Koch island", visualizationData}});
 }
