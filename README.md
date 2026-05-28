@@ -74,10 +74,10 @@ https://github.com/user-attachments/assets/6151b92e-5fe0-4a6a-a4b8-3b5fb86e0ce5
 **Figure 2.** Quadratic Koch island visualization.
 
 **Implementation**\
-This project is done in SDL and C++. The choice of SDL is justified by the fact that the only required functionality features input handling, and line or text rendering.
+This project is done in SDL and C++. The choice of SDL is justified by the fact that the only required functionality features are input handling and line or text rendering.
 Opting for a framework with higher-level abstractions seems unnecessary to me for this purpose.\
 \
-In the implementation, the L-system declaration is split in 2 structs: `LSystem` and `VisualizationData`. The former stores the settings related to the stage generation and the latter - to the visualization of these stages. This is a decision made for the sake of reusability of the `VisualizationData`.
+In the implementation, the L-system declaration is split in 2 structs: `LSystem` and `VisualizationData`. The former stores the settings related to the stage generation, and the latter - to the visualization of these stages. This is a decision made for the sake of reusability of the `VisualizationData`.
 ```c++
 // Fractals/Main.cpp
 using namespace LSystems;
@@ -145,7 +145,7 @@ https://github.com/user-attachments/assets/7c1b89e8-600c-4766-8dcf-0d6a8f8ae093
 **Figure 3.** Simple branching structure visualization.
 
 **Implementation**\
-It is a few additions to the line generation logic that was already present in the project.\
+There are a few additions to the line generation logic that were already present in the project.\
 First, introduction of the state:
 ```c++
 // Engine/Source/Application.cpp
@@ -208,7 +208,7 @@ https://github.com/user-attachments/assets/3d58530f-c421-4e3a-8b26-3cb33914310a
 
 **Figure 5.** H-tree visualization.
 
-**NOTE:** One can also define length as _d(g)_ = $2^{-g/2}$, where g - stage idx $\in [0, n)$\. See *(nicebyte, 2018)*. However, in the implementation for this research, I use consecutive multiplications by $\sqrt 2$ instead. I do it for the sake of avoiding the necessity to digress to sophisticated parsing.
+**NOTE:** One can also define length as _d(g)_ = $2^{-g/2}$, where g - stage idx $\in [0, n)$\. See *(nicebyte, 2018)*. However, in the implementation for this research, I use consecutive multiplications by $\sqrt 2$ instead. I do it to avoid the necessity to digress to sophisticated parsing.
 
 For the sake of drawing a tree, except for the length shortening, there is also a need for angle randomization and thickness decreasing.\
 Once both of these features are added, it is possible to return to attempting to draw a tree.
@@ -298,7 +298,7 @@ The goal of the research was successfully achieved; I indeed generated a 2D tree
 
 ## Limitations and further research possibilities
 When it comes to my implementation in particular, first and foremost, I would like to give users maximal control over the definition of generated L-systems, as well as the ability to save the presets created. Furthermore, modification of the parameters at runtime with instant visual feedback would create significantly more room for experimentation with the tool.\
-Moreover, there will be an inevitable need to invest into parsing. It would be interesting to do it at compile time for the serialized systems. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
+Moreover, there will be an inevitable need to invest in parsing. It would be interesting to do it at compile time for the serialized systems. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
 Another substantial leap that would potentially allow for more real-world applications for the tool would be to make it work in 3D and provide trees with crowns, consisting of leaves, buds, flowers, etc. To achieve this, I would probably start using an existing framework with 3D rendering capabilities, like Godot game engine.
 
 # Source list
