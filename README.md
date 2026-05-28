@@ -1,6 +1,6 @@
 # About
-This project is research that serves a single purpose of enabling the author to generate 2D trees using L-systems, which is a problem that has already been solved and has qualitative implementations. This work is targeted at personal development rather than at contributing to the field. It mostly features literature analysis, explaining the concept of L-systems from the ground up and providing open-source C++ projects that demonstrate the application of the theory covered.
-This research is one of the exam assignments done by Aleksandrs Stukalovs for the Algorithms 2 course at Howest Digital Arts and Entertainment in the year 2026.
+This project is research that serves a single purpose of enabling me to generate 2D trees using L-systems, which is a problem that has already been solved and has qualitative implementations. This work is targeted at personal development rather than at contributing to the field. It mostly features literature analysis, explaining the concept of L-systems from the ground up and providing open-source projects(made with C++ and SDL) that demonstrate the application of the theory covered.
+This research is one of the exam assignments done by me for the Algorithms 2 course at Howest Digital Arts and Entertainment in the year 2026.
 The project and the research are available on the following repository: https://github.com/DAE-GD-2025-2026/AlexStukalovs_Research
 
 # Definition 
@@ -125,7 +125,7 @@ https://github.com/user-attachments/assets/3d58530f-c421-4e3a-8b26-3cb33914310a
 
 **Figure 5.** H-tree visualization.
 
-**NOTE:** One can also define length as _d(g)_ = $2^{-g/2}$, where g - stage idx $\in [0, n)$\. See *(nicebyte, 2018)*. However, in the implementation for this research, the author uses consecutive multiplications by $\sqrt 2$ instead. It is done for the sake of avoiding the necessity to digress to sophisticated parsing.
+**NOTE:** One can also define length as _d(g)_ = $2^{-g/2}$, where g - stage idx $\in [0, n)$\. See *(nicebyte, 2018)*. However, in the implementation for this research, I use consecutive multiplications by $\sqrt 2$ instead. I do it for the sake of avoiding the necessity to digress to sophisticated parsing.
 
 $\omega$ : `FL`\
 $p$ : `L -> [-FL][+FL]`\
@@ -134,21 +134,18 @@ _a_ : $20^\circ$ + Rand($-5^\circ$, $5^\circ$)\
 _d_ : 100 / g + Rand($-10^\circ$, $10^\circ$), g - stage idx $\in [0, n)$\
 _t_ : 5 / g - thickness
 
-**NOTE:** Here, the necessity for parsing is apparent, yet was still avoided by the author by introducing separate parameters for absolute randomization values, addends, and boolean values to control whether length and thickness have to be divided by the stage index. 
-
-
+**NOTE:** Here, the necessity for parsing is apparent, yet I still avoid it by introducing separate parameters for absolute randomization values, addends, and boolean values to control whether length and thickness have to be divided by the stage index.
 
 https://github.com/user-attachments/assets/8657fe92-68b7-4cea-a067-23793a465342
-
 
 **Figure 5.** 2D tree visualization.
 
 # Conclusion
-The goal of the research was successfully achieved; the author indeed generated a 2D tree using L-systems. The concept of L-systems once again proved to be a versatile tool, allowing for relatively realistic visual approximation of various organic structures. 
+The goal of the research was successfully achieved; I indeed generated a 2D tree using L-systems. The concept of L-systems proved to be a versatile tool, allowing for relatively realistic visual approximation of various organic structures. 
 
 ## Limitations and further research possibilities
-When it comes to the author's implementation in particular, first and foremost, it would be desired to give users maximal control over the definition of generated L-systems, as well as the ability to save the presets created. Furthermore, modification of the parameters at runtime with instant visual feedback would create significantly more room for experimentation with the tool.\
-Furthermore, there will be an inevitable need to invest into parsing. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
+When it comes to my implementation in particular, first and foremost, I would like to give users maximal control over the definition of generated L-systems, as well as the ability to save the presets created. Furthermore, modification of the parameters at runtime with instant visual feedback would create significantly more room for experimentation with the tool.\
+Moreover, there will be an inevitable need to invest into parsing. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
 Another substantial leap that would potentially allow for more real-world applications for the tool would be to make it work in 3D and provide trees with crowns, consisting of leaves, buds, flowers, etc.
 
 # Source list
