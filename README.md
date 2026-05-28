@@ -2,7 +2,8 @@
 This project is research that serves a single purpose of enabling me to generate 2D trees using L-systems, which is a problem that has already been solved and has qualitative implementations. This work is targeted at personal development rather than at contributing to the field. It mostly features literature analysis, explaining the concept of L-systems from the ground up and providing open-source projects(made with C++ and SDL) that demonstrate the application of the theory covered.
 This research is one of the exam assignments done by me for the Algorithms 2 course at Howest Digital Arts and Entertainment in the year 2026.
 The project and the research are available on the following repository: https://github.com/DAE-GD-2025-2026/AlexStukalovs_Research
-
+## Motivation
+I opted for this topic since procedural tree generation using L-systems is something that I was willing to get to for at least a year already, and now I finally got an opportunity to dedicate the time it needs to it. I am interested in experimenting with simulating procedural soft-body destruction, and a tree is the first object that I am planning to implement this simulation on in the future.
 # Definition 
 **L-Systems**(a.k.a., Lindenmayer Systems) are a mathematical theory of plant development named in honor of biologist Aristid Lindenmayer. L-System is a rewriting system, meaning it defines complex objects by successively replacing parts of a simple initial object using a set of rewriting rules. Note that L-Systems are parallel, as in they apply rules to all the elementary parts of an object simultaneously and not sequentially. *(Prusinkiewicz & Lindenmayer, 1990, p. 1 - 2)*
 # Algorithm
