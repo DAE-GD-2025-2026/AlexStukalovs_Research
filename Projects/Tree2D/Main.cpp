@@ -57,11 +57,11 @@ int main()
         .absRadiansAddend = Engine::Utils::ToRadians(5.f),
 
         .startLengthPx = 100.f,
-        .divideLengthByStage = true,
+        .divideLengthByStageIdx = true,
         .absLengthAddend = 10,
 
         .widthPx = 5.f,
-        .divideWidthByStage = true,
+        .divideWidthByStageIdx = true,
     };
 
     std::vector<LSystemData> const lSystemData {

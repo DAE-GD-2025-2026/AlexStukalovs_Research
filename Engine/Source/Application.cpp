@@ -267,7 +267,7 @@ struct State final
 {
     LSystems::Vector2f point{};
     float radians{},
-        lengthPx{},// from 1 to 0, where 1 is the longest it can get
+        lengthPx{},
         widthPx{ 1.f };
     uint32_t stateIdx{};
 };
@@ -291,7 +291,7 @@ auto LSystems::Engine::Application::Impl::GenerateLines(Stage const& stage, Visu
         {
             // Randomizing length around the base length for this stage
             float segmentLength{ currentState.lengthPx };
-            if (data.divideLengthByStage) segmentLength /= static_cast<float>(currentState.stateIdx + 1);
+            if (data.divideLengthByStageIdx) segmentLength /= static_cast<float>(currentState.stateIdx + 1);
             if (data.absLengthAddend > 0.f) segmentLength += Utils::GetRandFloatInRange(-data.absLengthAddend, data.absLengthAddend);
 
             // Drawing a line in the current direction
@@ -325,7 +325,7 @@ auto LSystems::Engine::Application::Impl::GenerateLines(Stage const& stage, Visu
         case '[':// Pushing the state to the stack
             savedStates.push(currentState);
             // Dividing base width by stage idx if requested
-            if (data.divideWidthByStage)
+            if (data.divideWidthByStageIdx)
                 currentState.widthPx = std::max(1.f, currentState.widthPx / static_cast<float>(savedStates.size() + 1));
             break;
         case ']':// Popping the state from the stack

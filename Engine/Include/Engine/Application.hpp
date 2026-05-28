@@ -11,18 +11,17 @@ namespace LSystems
 {
     struct VisualizationData final
     {
-        // The rotation by which + or - will turn
-        float startRadians{};
-        float absRadians{};
-        float absRadiansAddend{};
+        float startRadians{};// Rotation for the first line
+        float absRadians{};// The rotation by which + or - will turn
+        float absRadiansAddend{};// Value of Rand(-absRadiansAdded, absRadiansAddend) gets added to absRadians
 
-        float startLengthPx{ 1.f };
-        bool divideLengthByStage{};
-        float absLengthAddend{};
-        float lengthDividend{ 1.f };
+        float startLengthPx{ 1.f };// Gets scaled to the maximal size in FitLinesToScreen()
+        bool divideLengthByStageIdx{};// Whether the length should be divided by stage index(useful for continuous segment shortening)
+        float absLengthAddend{};// Same as for radians
+        float lengthDividend{ 1.f };// Value by which to divide length every frame
 
-        float widthPx{ 1.f };
-        bool divideWidthByStage{};
+        float widthPx{ 1.f };// Values < 1.f will be clamped to 1.f
+        bool divideWidthByStageIdx{};// Same as for length
     };
     struct LSystemData final
     {

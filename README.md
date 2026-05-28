@@ -14,8 +14,8 @@ The simplest L-system type is **D0L** - **D**eterministic **0**(zero)-context **
 Each algorithm is defined by the following data:
 * **Axiom** - initial object's form defined by a string. Denoted as $\omega$ (omega). 
 * **Productions** - rules applied to objects' parts(characters). Denoted as $p_i, i \in \mathbb{N}$.
-	* **Predecessor** - left-hand side of production
-	* **Successor** - right-hand side of production
+    * **Predecessor** - left-hand side of production
+    * **Successor** - right-hand side of production
 
 Then the productions are applied to every string that can act as a predecessor.
 A constant $n$, $n \in \mathbb{N}$, representing the number of times the productions are applied.
@@ -73,6 +73,59 @@ https://github.com/user-attachments/assets/6151b92e-5fe0-4a6a-a4b8-3b5fb86e0ce5
 
 **Figure 2.** Quadratic Koch island visualization.
 
+**Implementation**\
+This project is done in SDL and C++. The choice of SDL is justified by the fact that the only required functionality features input handling, and line or text rendering.
+Opting for a framework with higher-level abstractions seems unnecessary to me for this purpose.\
+\
+In the implementation, the L-system declaration is split in 2 structs: `LSystem` and `VisualizationData`. The former stores the settings related to the stage generation and the latter - to the visualization of these stages. This is a decision made for the sake of reusability of the `VisualizationData`.
+```c++
+// Fractals/Main.cpp
+using namespace LSystems;
+Stages const kochIslandStages{ GenerateStages(LSystem{
+    .axiom = "F-F-F-F",
+    .rules = Rules{Rule{ 'F', "F-F+F+FF-F-F+F" }},
+    .stageCount = 5
+}) };
+VisualizationData constexpr visualizationData {// Separate, so can be reused
+    .absRadians = 0.5f * std::numbers::pi_v<float>,
+};
+```
+
+Then both these structs are assembled together, given a name and passed to the engine to generate the lines from and draw.
+```c++
+Engine::Application engine{ "Fractal visualizer"};
+engine.Run({{kochIslandStages, "Koch island", visualizationData}});
+```
+A simplified version of line generation logic looks as follows:
+```C++
+// Engine/Source/Application.cpp
+// Generating the points
+for (char const character : stage)
+{
+    switch (character)
+    {
+    case 'F':
+    {
+        // Drawing a line in the current direction
+        Vector2f const newPointPx {
+            currentState.point + segmentLength * Vector2f {
+                std::cosf(currentState.radians),
+                std::sinf(currentState.radians),
+            }
+        };
+        lines.emplace_back(currentState.point, newPointPx, currentState.widthPx);
+
+        break;
+    }
+    case '+':// "Turning left"
+        currentState.radians += data.absRadiansAddend;
+        break;
+    case '-':// "Turning right"
+        currentState.radians -= data.absRadiansAddend;
+        break;
+// (...)
+```
+
 # Bracketed L-systems
 The algorithm shown previously is capable of displaying fractals, but it is not capable of creating plant-like structures. The reason is that it always draws a single, uninterrupted line, whereas, for instance, for plant branch generation, it is necessary to be able to interrupt drawing of a certain branch, go back to the stem or trunk, and then proceed with other branches. *(Ochoa, 1998)*.\
 It is done by incorporating pushdown automation and using a stack to save the state turtle has to return to after receiving a request to pop from the stack. It is denoted as follows:\
@@ -90,6 +143,35 @@ https://github.com/user-attachments/assets/7c1b89e8-600c-4766-8dcf-0d6a8f8ae093
 
 
 **Figure 3.** Simple branching structure visualization.
+
+**Implementation**\
+It is a few additions to the line generation logic that was already present in the project.\
+First, introduction of the state:
+```c++
+// Engine/Source/Application.cpp
+struct State final
+{
+    LSystems::Vector2f point{};
+    float radians{}, lengthPx{}, widthPx{ 1.f };
+    uint32_t stateIdx{};
+};
+```
+Second, addition of the state stack and pushing/popping symbol parsing:
+```c++
+// Engine/Source/Application.cpp
+std::stack<State> savedStates;
+State currentState{{}, data.startRadians, data.startLengthPx, data.widthPx};
+// (...)
+case '[':// Pushing the state to the stack
+    savedStates.push(currentState);
+    break;
+case ']':// Popping the state from the stack
+    if (savedStates.empty()) break;
+    currentState = savedStates.top();
+    savedStates.pop();
+    break;
+// (...)
+```
 
 An attempt to visualize a tree using all the information provided in this research by this moment will look as follows:
 
@@ -128,6 +210,9 @@ https://github.com/user-attachments/assets/3d58530f-c421-4e3a-8b26-3cb33914310a
 
 **NOTE:** One can also define length as _d(g)_ = $2^{-g/2}$, where g - stage idx $\in [0, n)$\. See *(nicebyte, 2018)*. However, in the implementation for this research, I use consecutive multiplications by $\sqrt 2$ instead. I do it for the sake of avoiding the necessity to digress to sophisticated parsing.
 
+For the sake of drawing a tree, except for the length shortening, there is also a need for angle randomization and thickness decreasing.\
+Once both of these features are added, it is possible to return to attempting to draw a tree.
+
 $\omega$ : `FL`\
 $p$ : `L -> [-FL][+FL]`\
 $n$ : `8`\
@@ -135,19 +220,86 @@ _a_ : $20^\circ$ + Rand($-5^\circ$, $5^\circ$)\
 _d_ : 100 / g + Rand($-10^\circ$, $10^\circ$), g - stage idx $\in [0, n)$\
 _t_ : 5 / g - thickness
 
-**NOTE:** Here, the necessity for parsing is apparent, yet I still avoid it by introducing separate parameters for absolute randomization values, addends, and boolean values to control whether length and thickness have to be divided by the stage index.
 
 https://github.com/user-attachments/assets/8657fe92-68b7-4cea-a067-23793a465342
 
 **Figure 5.** 2D tree visualization.
+
+**Implementation**\
+The `VisualizationData` got a few additions to it:
+```c++
+// Engine/Include/Application.hpp
+struct VisualizationData final
+{
+    float startRadians{};// Rotation for the first line
+    float absRadians{};// The rotation by which + or - will turn
+    float absRadiansAddend{};// Value of Rand(-absRadiansAdded, absRadiansAddend) gets added to absRadians
+
+    float startLengthPx{ 1.f };// Gets scaled to the maximal size in FitLinesToScreen()
+    bool divideLengthByStageIdx{};// Whether the length should be divided by stage index(useful for continuous segment shortening)
+    float absLengthAddend{};// Same as for radians
+    float lengthDividend{ 1.f };// Value by which to divide length every frame
+
+    float widthPx{ 1.f };// Values < 1.f will be clamped to 1.f
+    bool divideWidthByStageIdx{};// Same as for length
+};
+```
+As for the line generation, it now keeps all the properties above into consideration:\
+**NOTE:** Here, the necessity for parsing is apparent, yet I still avoid it by introducing separate parameters for absolute randomization values, addends, and boolean values to control whether length and thickness have to be divided by the stage index.
+```c++
+// Engine/Source/Application.cpp
+// (...)
+case 'F':
+{
+    // Randomizing length around the base length for this stage
+    float segmentLength{ currentState.lengthPx };
+    if (data.divideLengthByStageIdx) segmentLength /= static_cast<float>(currentState.stateIdx + 1);
+    if (data.absLengthAddend > 0.f) segmentLength += Utils::GetRandFloatInRange(-data.absLengthAddend, data.absLengthAddend);
+
+    // Drawing a line in the current direction
+    Vector2f const newPointPx {
+        currentState.point + segmentLength * Vector2f {
+            std::cosf(currentState.radians),
+            std::sinf(currentState.radians),
+        }
+    };
+    lines.emplace_back(currentState.point, newPointPx, currentState.widthPx);
+
+    // Updating the state
+    currentState.point = newPointPx;
+    ++currentState.stateIdx;
+    currentState.lengthPx /= data.lengthDividend;
+
+    break;
+}
+case '+':// "Turning left"
+    currentState.radians += Utils::GetRandFloatInRange(
+        data.absRadians - data.absRadiansAddend,
+        data.absRadians + data.absRadiansAddend
+    );
+    break;
+case '-':// "Turning right"
+    currentState.radians -= Utils::GetRandFloatInRange(
+        data.absRadians - data.absRadiansAddend,
+        data.absRadians + data.absRadiansAddend
+    );
+    break;
+case '[':// Pushing the state to the stack
+    savedStates.push(currentState);
+    // Dividing base width by stage idx if requested
+    if (data.divideWidthByStageIdx)
+        currentState.widthPx = std::max(1.f, currentState.widthPx / static_cast<float>(savedStates.size() + 1));
+    break;
+// (...)
+```
 
 # Conclusion
 The goal of the research was successfully achieved; I indeed generated a 2D tree using L-systems. The concept of L-systems proved to be a versatile tool, allowing for relatively realistic visual approximation of various organic structures. 
 
 ## Limitations and further research possibilities
 When it comes to my implementation in particular, first and foremost, I would like to give users maximal control over the definition of generated L-systems, as well as the ability to save the presets created. Furthermore, modification of the parameters at runtime with instant visual feedback would create significantly more room for experimentation with the tool.\
-Moreover, there will be an inevitable need to invest into parsing. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
-Another substantial leap that would potentially allow for more real-world applications for the tool would be to make it work in 3D and provide trees with crowns, consisting of leaves, buds, flowers, etc.
+Moreover, there will be an inevitable need to invest into parsing. It would be interesting to do it at compile time for the serialized systems. Regarding the features not related to user feedback, the next step would be to add the ability to create multiple rules for the same symbol and provide a probability for the occurrence of each of the rules. This addition would allow for making the systems "more stochastic, " i.e., more random and hence potentially also more realistic.\
+Another substantial leap that would potentially allow for more real-world applications for the tool would be to make it work in 3D and provide trees with crowns, consisting of leaves, buds, flowers, etc. To achieve this, I would probably start using an existing framework with 3D rendering capabilities, like Godot game engine.
 
 # Source list
 * Prusinkiewicz P., Lindenmayer A. (1990). *The Algorithmic Beauty Of Plants*. Springer. https://algorithmicbotany.org/papers/abop/abop.pdf
